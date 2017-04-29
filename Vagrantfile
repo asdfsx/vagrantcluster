@@ -6,7 +6,7 @@
 # backwards compatibility). Please don't change it unless you know what
 # you're doing.
 Vagrant.configure("2") do |config|
-  (1..1).each do |i|
+  (1..4).each do |i|
     config.vm.define "node#{i}" do |node|
       node.vm.box = "ubuntu-16.04"
       node.vm.hostname="node#{i}"
@@ -19,9 +19,10 @@ Vagrant.configure("2") do |config|
       end
       node.vm.provision "shell", inline: <<-SHELL
         sudo su -c "cat /home/ubuntu/share/sources.list > /etc/apt/sources.list"
-        sudo su -c "cat /home/ubuntu/share/authorized_keys > /home/ubuntu/.ssh/authorized_keys"
+        sudo su -c "cat /home/ubuntu/share/authorized_keys >> /home/ubuntu/.ssh/authorized_keys"
         sudo apt-get update
         sudo apt-get -y install openjdk-8-jre
+        sudo apt-get -y install python-minimal python2.7
       SHELL
     end
   end
