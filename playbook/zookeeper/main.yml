@@ -21,9 +21,7 @@
     zookeeper_conf_dir: "{{zookeeper_dir}}"
     zookeeper_tarball_dir: /home/ubuntu/share
     zookeeper_force_myid: yes
-    zookeeper_hosts:
-      - host: "{{inventory_hostname}}"
-        id: 1
+    zookeeper_hosts: "{{groups['zookeeper']}}"
   tasks:
     - name: "Ensure the tarball dir exists at {{zookeeper_tarball_dir}}"
       file: path={{zookeeper_tarball_dir}} state=directory

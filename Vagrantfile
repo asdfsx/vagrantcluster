@@ -20,6 +20,7 @@ Vagrant.configure("2") do |config|
       node.vm.provision "shell", inline: <<-SHELL
         sudo su -c "cat /home/ubuntu/share/sources.list > /etc/apt/sources.list"
         sudo su -c "cat /home/ubuntu/share/authorized_keys >> /home/ubuntu/.ssh/authorized_keys"
+        sudo su -c "cat /home/ubuntu/share/hosts >> /etc/hosts"
         sudo apt-get update
         sudo apt-get -y install openjdk-8-jre
         sudo apt-get -y install python-minimal python2.7
