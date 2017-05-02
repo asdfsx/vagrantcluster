@@ -1,0 +1,70 @@
+---
+
+- hosts: hadoop
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    dfs_blocksize: 16777216
+    max_xcievers: 64
+    data_dir: /var/lib/hadoop
+    log_dir: /var/log/hadoop
+    site_name: hadoop4test   
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}} 
+    hadoop_conf_dir: "{{hadoop_dir}}/conf"
+    hadoop_tarball_dir: /home/ubuntu/share
+    hadoop_hosts:
+      - host: "{{groups['hadoop']}}"
+        id: 1
+  tasks:
+    - name: "Ensure the tarball dir exists at {{hadoop_tarball_dir}}"
+      file: path={{hadoop_tarball_dir}} state=directory
+
+    - name: "Ensure the hadoop dir exists at {{hadoop_dir}}"
+      file: path={{hadoop_dir}} state=directory
+
+    - name: Unpack tarball.
+      command: tar zxf {{hadoop_tarball_dir}}/hadoop-{{hadoop_version}}.tar.gz --strip-components=1 chdir={{hadoop_dir}} creates={{hadoop_dir}}/bin
+      tags: bootstrap
+
+    - name: "install liblzo2"
+      command: apt-get -y install liblzo2-dev
+
+    - name: "download hadoop-lzo"
+      command: creates={{ hadoop_dir }}/share/hadoop/common/lib/hadoop-lzo-0.4.15-gplextras5.0.0.jar chdir={{ hadoop_dir }}/share/hadoop/common/lib/ curl -O http://repo.spring.io/plugins-release/com/hadoop/gplcompression/hadoop-lzo/0.4.15-gplextras5.0.0/hadoop-lzo-0.4.15-gplextras5.0.0.jar
+
+    - name: "Create hadoop {{item}} directory."
+      file: path={{item}} state=directory owner=root group=root
+      tags: bootstrap
+      with_items:
+        - "{{data_dir}}"
+        - "{{log_dir}}"
+        - "{{hadoop_conf_dir}}"
+        - "{{log_dir}}/hadoop-hdfs"
+
+    - name: Config Hadoop
+      template: src={{ item }} dest="{{hadoop_dir}}/conf/{{ item }}" owner=root group=root mode=0644
+      with_items:
+        - core-site.xml
+        - hadoop-env.sh
+        - hadoop-metrics2.properties
+        - hdfs-site.xml
+        - org-xerial-snappy.properties
+        - slaves
+        - mapred-site.xml
+        - yarn-site.xml
+        - fair-scheduler.xml
+
+- hosts: namenodes[0]
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}}
+  tasks:
+    - name: "format hdfs"
+      command: "{{ hadoop_dir }}/bin/hdfs namenode -format -force"
