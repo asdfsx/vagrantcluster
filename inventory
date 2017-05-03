@@ -1,0 +1,10 @@
+[zookeepers]
+node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[namenodes]
+node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[datanodes]
+node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node3     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node4     ansible_connection=ssh        ansible_ssh_user=ubuntu
