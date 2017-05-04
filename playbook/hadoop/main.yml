@@ -10,6 +10,7 @@
     max_xcievers: 64
     data_dir: /var/lib/hadoop
     log_dir: /var/log/hadoop
+    qjournal_dir: /var/lib/qjournal
     site_name: hadoop4test   
     hadoop_version: 2.7.3
     hadoop_dir: /root/hadoop-{{hadoop_version}} 
@@ -24,6 +25,12 @@
 
     - name: "Ensure the hadoop dir exists at {{hadoop_dir}}"
       file: path={{hadoop_dir}} state=directory
+
+    - name: "Ensure the qjournal dir exists at {{qjournal_dir}}"
+      file: path={{qjournal_dir}} state=directory
+
+    - name: determine interface
+      set_fact: ipv4_address="{{ hostvars[inventory_hostname].ansible_enp0s8.ipv4.address }}"
 
     - name: Unpack tarball.
       command: tar zxf {{hadoop_tarball_dir}}/hadoop-{{hadoop_version}}.tar.gz --strip-components=1 chdir={{hadoop_dir}} creates={{hadoop_dir}}/bin
@@ -56,6 +63,7 @@
         - mapred-site.xml
         - yarn-site.xml
         - fair-scheduler.xml
+        - dfs.hosts.exclude
 
 - hosts: namenodes[0]
   user: ubuntu
@@ -66,5 +74,70 @@
     hadoop_version: 2.7.3
     hadoop_dir: /root/hadoop-{{hadoop_version}}
   tasks:
-    - name: "format hdfs"
-      command: "{{ hadoop_dir }}/bin/hdfs namenode -format -force"
+    - name: "debug"
+      debug: msg="{{ hostvars[item] }}"
+      with_items: "{{ groups['journalnodes'] }}"
+      
+    - name: "start journal"
+      command: "{{ hadoop_dir}}/sbin/hadoop-daemons.sh start journalnode"
+
+    #- name: "format ha zk"
+    #  shell: "echo \"n\" |{{ hadoop_dir}}/bin/hdfs zkfc -formatZK"
+
+    #- name: "format hdfs"
+    #  command: "{{ hadoop_dir }}/bin/hdfs namenode -format -force"
+
+    #- name: "start namenode"
+    #  command: "{{ hadoop_dir }}/sbin/hadoop-daemon.sh start namenode"
+
+- hosts: namenodes[1]
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}}
+  tasks:
+    #- name: sync data to standby namenode
+    #  command: "{{hadoop_dir}}/bin/hdfs namenode –bootstrapStandby"
+
+    #- name: start standby namenode
+    #  command: "{{hadoop_dir}}/sbin/hadoop-daemon.sh start namenode"
+
+- hosts: datanodes
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}}
+  tasks:
+    - name: start datanode
+      command: "{{hadoop_dir}}/sbin/hadoop-daemons.sh start datanode"
+
+- hosts: resourcemanager
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}}
+  tasks:
+    - name: start yarn
+      command: "{{hadoop_dir}}/sbin/start-yarn.sh"
+
+- hosts: namenodes[0]
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}}
+  tasks:
+    - name: start zkfc
+      command: "{{hadoop_dir}}/sbin/hadoop-daemons.sh start zkfc"
+
