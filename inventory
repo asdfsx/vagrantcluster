@@ -12,6 +12,7 @@ node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
 
 [journalnodes]
 node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
 
 [historyserver]
 node2     ansible_connection=ssh        ansible_ssh_user=ubuntu

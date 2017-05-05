@@ -1,56 +1,39 @@
 ---
 
-- hosts: hadoop
+- hosts: spark
   user: ubuntu
   become: yes
   become_method : sudo
   become_user: root
   vars:
-    dfs_blocksize: 16777216
-    max_xcievers: 64
-    data_dir: /data/hadoop
-    dfs_dir: /data/hadoop/dfs
-    qjournal_dir: /data/hadoop/qjournal
-    log_dir: /data/hadoop/log
-    site_name: hadoop4test   
     hadoop_version: 2.7.3
     hadoop_dir: /root/hadoop-{{hadoop_version}} 
     hadoop_conf_dir: "{{hadoop_dir}}/conf"
-    hadoop_tarball_dir: /home/ubuntu/share
     hadoop_hosts:
       - host: "{{groups['hadoop']}}"
         id: 1
+    spark_version: 2.1.0
+    spark_dir: /root/spark-{{hadoop_version}}
+    spark_tarball_dir: /home/ubuntu/share
   tasks:
     - name: "Ensure the tarball dir exists at {{hadoop_tarball_dir}}"
       file: path={{hadoop_tarball_dir}} state=directory
 
-    - name: "Ensure the hadoop dir exists at {{hadoop_dir}}"
-      file: path={{hadoop_dir}} state=directory
-    
-    - name: "Ensure /etc/hosts dont have 127.0.0.1 node1 config"
-      command: sed -i '/^127.0.0.1.*node/d' /etc/hosts
+    - name: "Ensure the spark dir exists at {{spark_dir}}"
+      file: path={{spark_dir}} state=directory   
 
     - name: determine interface
       set_fact: ipv4_address="{{ hostvars[inventory_hostname].ansible_enp0s8.ipv4.address }}"
 
     - name: Unpack tarball.
-      command: tar zxf {{hadoop_tarball_dir}}/hadoop-{{hadoop_version}}.tar.gz --strip-components=1 chdir={{hadoop_dir}} creates={{hadoop_dir}}/bin
-      tags: bootstrap
-
-    - name: "install liblzo2"
-      command: apt-get -y install liblzo2-dev
-
-    - name: "download hadoop-lzo"
-      command: creates={{ hadoop_dir }}/share/hadoop/common/lib/hadoop-lzo-0.4.15-gplextras5.0.0.jar chdir={{ hadoop_dir }}/share/hadoop/common/lib/ curl -O http://repo.spring.io/plugins-release/com/hadoop/gplcompression/hadoop-lzo/0.4.15-gplextras5.0.0/hadoop-lzo-0.4.15-gplextras5.0.0.jar
+      command: tar zxf {{spark_tarball_dir}}/spark-{{spark_version}}-bin-hadoop2.7.tgz --strip-components=1 chdir={{spark_dir}} creates={{spark_dir}}/bin
 
     - name: "Create hadoop {{item}} directory."
       file: path={{item}} state=directory owner=root group=root
       tags: bootstrap
       with_items:
         - "{{data_dir}}"
-        - "{{dfs_dir}}"
         - "{{log_dir}}"
-        - "{{qjournal_dir}}"
         - "{{hadoop_conf_dir}}"
         - "{{log_dir}}/hadoop-hdfs"
 
@@ -80,18 +63,15 @@
     - name: "debug"
       debug: msg="{{ hostvars[item] }}"
       with_items: "{{ groups['journalnodes'] }}"
-
-    - name: "start dfs"
-      command: "{{ hadoop_dir }}/sbin/start-dfs.sh"
       
     - name: "start journal"
-      shell: "{{ hadoop_dir }}/sbin/hadoop-daemons.sh start journalnode"
+      command: "{{ hadoop_dir}}/sbin/hadoop-daemons.sh start journalnode"
 
     #- name: "format ha zk"
-    #  command: "{{ hadoop_dir}}/bin/hdfs zkfc -formatZK -force"
+    #  shell: "echo \"n\" |{{ hadoop_dir}}/bin/hdfs zkfc -formatZK"
 
-    - name: "format hdfs"
-      command: "{{ hadoop_dir }}/bin/hdfs namenode -format -force"
+    #- name: "format hdfs"
+    #  command: "{{ hadoop_dir }}/bin/hdfs namenode -format -force"
 
     #- name: "start namenode"
     #  command: "{{ hadoop_dir }}/sbin/hadoop-daemon.sh start namenode"
@@ -105,8 +85,8 @@
     hadoop_version: 2.7.3
     hadoop_dir: /root/hadoop-{{hadoop_version}}
   tasks:
-    - name: sync data to standby namenode
-      command: "{{hadoop_dir}}/bin/hdfs namenode –bootstrapStandby"
+    #- name: sync data to standby namenode
+    #  command: "{{hadoop_dir}}/bin/hdfs namenode –bootstrapStandby"
 
     #- name: start standby namenode
     #  command: "{{hadoop_dir}}/sbin/hadoop-daemon.sh start namenode"

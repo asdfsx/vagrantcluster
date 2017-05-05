@@ -1,13 +1,13 @@
 ---
 
-- hosts: zookeeper
+- hosts: zookeepers
   user: ubuntu
   become: yes
   become_method : sudo
   become_user: root
   vars:
-    data_dir: /var/lib/zookeeper
-    log_dir: /var/log/zookeeper
+    data_dir: /data/zookeeper/data
+    log_dir: /data/zookeeper/log
     
     client_port: 2181
     init_limit: 5
