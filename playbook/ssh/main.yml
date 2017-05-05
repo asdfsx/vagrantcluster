@@ -17,6 +17,9 @@
     - name: check keys
       debug: msg="{{ ssh_keys.stdout }}"
 
+    - name: clean authorized_key
+      shell: echo "" > ~/.ssh/authorized_keys
+
     - name: deploy keys on all servers
       authorized_key: 
         user: root 
