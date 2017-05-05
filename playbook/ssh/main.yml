@@ -43,3 +43,18 @@
         key: "{{ item.stdout }}"
         path: "/root/.ssh/known_hosts"
       with_items: '{{ hosts.results }}'
+
+    - name: For each host, scan for its ssh public key, use ipaddress instead of hostname
+      command: "ssh-keyscan -t rsa {{ hostvars[item].ansible_enp0s8.ipv4.address }}"
+      register: hosts
+      with_items: "{{ groups['hadoop'] }}"
+
+    - name: check hosts
+      debug: msg="{{ hosts.results }}"
+
+    - name: deploy hosts on all servers
+      known_hosts:
+        name: "{{ hostvars[item.item].ansible_enp0s8.ipv4.address }}"
+        key: "{{ item.stdout }}"
+        path: "/root/.ssh/known_hosts"
+      with_items: '{{ hosts.results }}'
