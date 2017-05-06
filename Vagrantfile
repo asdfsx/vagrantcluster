@@ -6,7 +6,7 @@
 # backwards compatibility). Please don't change it unless you know what
 # you're doing.
 Vagrant.configure("2") do |config|
-  (1..3).each do |i|
+  (1..4).each do |i|
     config.vm.define "node#{i}" do |node|
       node.vm.box = "ubuntu-16.04"
       node.vm.hostname="node#{i}"

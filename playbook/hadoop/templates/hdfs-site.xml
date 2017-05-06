@@ -83,12 +83,12 @@
 
     <property>
         <name>dfs.name.dir</name>
-        <value>file:///data/dfs/nn</value>
+        <value>file://{{dfs_nn_dir}}</value>
     </property>
 
     <property>
         <name>dfs.data.dir</name>
-        <value>file:///data/dfs/dn</value>
+        <value>file://{{dfs_dn_dir}}</value>
     </property>
 
     <property>
@@ -131,7 +131,7 @@
 
     <property>
         <name>dfs.domain.socket.path</name>
-        <value>/var/run/hadoop-hdfs/dn._PORT</value>
+        <value>{{socket_dir}}/dn._PORT</value>
     </property>
 
     <property>

@@ -9,9 +9,12 @@
     dfs_blocksize: 16777216
     max_xcievers: 64
     data_dir: /data/hadoop
-    dfs_dir: /data/hadoop/dfs
+    dfs_dn_dir: /data/hadoop/dfs/dn
+    dfs_nn_dir: /data/hadoop/dfs/nn
     qjournal_dir: /data/hadoop/qjournal
     log_dir: /data/hadoop/log
+    socket_dir: /data/hadoop/socket
+    yarn_app_log_dir: /data/hadoop/yarn/apps
     site_name: hadoop4test   
     hadoop_version: 2.7.3
     hadoop_dir: /root/hadoop-{{hadoop_version}} 
@@ -48,10 +51,13 @@
       tags: bootstrap
       with_items:
         - "{{data_dir}}"
-        - "{{dfs_dir}}"
+        - "{{dfs_dn_dir}}"
+        - "{{dfs_nn_dir}}"
         - "{{log_dir}}"
         - "{{qjournal_dir}}"
         - "{{hadoop_conf_dir}}"
+        - "{{socket_dir}}"
+        - "{{yarn_app_log_dir}}"
         - "{{log_dir}}/hadoop-hdfs"
 
     - name: Config Hadoop
@@ -68,6 +74,18 @@
         - fair-scheduler.xml
         - dfs.hosts.exclude
 
+- hosts: journalnodes[0]
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}}
+  tasks:
+    - name: start journalnode
+      command: "{{ hadoop_dir }}/sbin/hadoop-daemons.sh start journalnode"
+
 - hosts: namenodes[0]
   user: ubuntu
   become: yes
@@ -77,21 +95,11 @@
     hadoop_version: 2.7.3
     hadoop_dir: /root/hadoop-{{hadoop_version}}
   tasks:
-    - name: "debug"
-      debug: msg="{{ hostvars[item] }}"
-      with_items: "{{ groups['journalnodes'] }}"
-
-    - name: "start dfs"
-      command: "{{ hadoop_dir }}/sbin/start-dfs.sh"
-      
-    - name: "start journal"
-      shell: "{{ hadoop_dir }}/sbin/hadoop-daemons.sh start journalnode"
-
-    #- name: "format ha zk"
+    #- name: "format zkfc"
     #  command: "{{ hadoop_dir}}/bin/hdfs zkfc -formatZK -force"
 
-    - name: "format hdfs"
-      command: "{{ hadoop_dir }}/bin/hdfs namenode -format -force"
+    #- name: "format namenode"
+    #  command: "{{ hadoop_dir }}/bin/hdfs namenode -format -force"
 
     #- name: "start namenode"
     #  command: "{{ hadoop_dir }}/sbin/hadoop-daemon.sh start namenode"
@@ -105,11 +113,23 @@
     hadoop_version: 2.7.3
     hadoop_dir: /root/hadoop-{{hadoop_version}}
   tasks:
-    - name: sync data to standby namenode
-      command: "{{hadoop_dir}}/bin/hdfs namenode –bootstrapStandby"
+    #- name: sync data to standby namenode
+    #  command: "{{hadoop_dir}}/bin/hdfs namenode –bootstrapStandby"
 
     #- name: start standby namenode
     #  command: "{{hadoop_dir}}/sbin/hadoop-daemon.sh start namenode"
+
+- hosts: namenodes
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}}
+  tasks:
+    #- name: "start zkfc"
+    #  command: "{{hadoop_dir}}/sbin/hadoop-daemon.sh --script {{hadoop_dir}}/bin/hdfs start zkfc"
 
 - hosts: datanodes
   user: ubuntu
@@ -120,8 +140,8 @@
     hadoop_version: 2.7.3
     hadoop_dir: /root/hadoop-{{hadoop_version}}
   tasks:
-    - name: start datanode
-      command: "{{hadoop_dir}}/sbin/hadoop-daemons.sh start datanode"
+    #- name: start datanode
+    #  command: "{{hadoop_dir}}/sbin/hadoop-daemons.sh start datanode"
 
 - hosts: resourcemanager
   user: ubuntu
@@ -132,18 +152,6 @@
     hadoop_version: 2.7.3
     hadoop_dir: /root/hadoop-{{hadoop_version}}
   tasks:
-    - name: start yarn
-      command: "{{hadoop_dir}}/sbin/start-yarn.sh"
-
-- hosts: namenodes[0]
-  user: ubuntu
-  become: yes
-  become_method : sudo
-  become_user: root
-  vars:
-    hadoop_version: 2.7.3
-    hadoop_dir: /root/hadoop-{{hadoop_version}}
-  tasks:
-    - name: start zkfc
-      command: "{{hadoop_dir}}/sbin/hadoop-daemons.sh start zkfc"
+    #- name: start yarn
+    #  command: "{{hadoop_dir}}/sbin/start-yarn.sh"
 
