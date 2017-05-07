@@ -11,6 +11,11 @@
     </property>
 
     <!-- Memory limits -->
+    <!-- 
+    <property>
+        <name>yarn.scheduler.minimum-allocation-mb</name>
+        <value>{{ ansible_memtotal_mb - 1024 }}</value>
+    </property>
     <property>
         <name>yarn.scheduler.maximum-allocation-mb</name>
         <value>{{ ansible_memtotal_mb - 1024 }}</value>
@@ -19,6 +24,7 @@
         <name>yarn.nodemanager.resource.memory-mb</name>
         <value>{{ ansible_memtotal_mb - 1024 }}</value>
     </property>
+    -->
 
     <property>
         <name>yarn.resourcemanager.resource-tracker.address</name>
@@ -53,7 +59,7 @@
     </property>
     <property>
         <name>yarn.nodemanager.aux-services</name>
-        <value>mapreduce.shuffle</value>
+        <value>mapreduce_shuffle</value>
     </property>
     <property>
         <name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
@@ -61,11 +67,11 @@
     </property>
     <property>
         <name>yarn.nodemanager.local-dirs</name>
-        <value>/data/yarn/local</value>
+        <value>{{yarn_data_local}}</value>
     </property>
     <property>
         <name>yarn.nodemanager.log-dirs</name>
-        <value>/data/yarn/logs</value>
+        <value>{{yarn_data_log}}</value>
     </property>
     <property>
         <description>Where to aggregate logs</description>
