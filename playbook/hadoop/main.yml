@@ -43,10 +43,16 @@
       tags: bootstrap
 
     - name: "install liblzo2"
-      command: apt-get -y install liblzo2-dev
+      command: apt-get -y install libsnappy1v5 libsnappy-dev liblzo2-2 liblzo2-dev lzop
 
-    - name: "download hadoop-lzo"
-      command: creates={{ hadoop_dir }}/share/hadoop/common/lib/hadoop-lzo-0.4.15-gplextras5.0.0.jar chdir={{ hadoop_dir }}/share/hadoop/common/lib/ curl -O http://repo.spring.io/plugins-release/com/hadoop/gplcompression/hadoop-lzo/0.4.15-gplextras5.0.0/hadoop-lzo-0.4.15-gplextras5.0.0.jar
+    #- name: "download hadoop-lzo"
+    #  command: creates={{ hadoop_dir }}/share/hadoop/common/lib/hadoop-lzo-0.4.15-gplextras5.0.0.jar chdir={{ hadoop_dir }}/share/hadoop/common/lib/ curl -O http://repo.spring.io/plugins-release/com/hadoop/gplcompression/hadoop-lzo/0.4.15-gplextras5.0.0/hadoop-lzo-0.4.15-gplextras5.0.0.jar
+
+    - name: "copy hadoop-lzo"
+      command: cp {{hadoop_tarball_dir}}/hadoop-lzo/hadoop-lzo-0.4.21-SNAPSHOT.jar {{hadoop_dir}}/share/hadoop/common/
+
+    - name: "copy hadoop-lzo native"
+      shell: cp {{hadoop_tarball_dir}}/hadoop-lzo/native/* {{hadoop_dir}}/lib/native
 
     - name: "Create hadoop {{item}} directory."
       file: path={{item}} state=directory owner=root group=root
@@ -77,6 +83,52 @@
         - yarn-site.xml
         - fair-scheduler.xml
         - dfs.hosts.exclude
+
+    - name: Adding JAVA_HOME in the /etc/profile
+      lineinfile: dest=/etc/profile line='export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre' insertafter='EOF' regexp='export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64' state=present
+
+    - name: Adding the path in the /etc/profile
+      lineinfile: dest=/etc/profile line='export PATH=$PATH:$JAVA_HOME/bin' insertafter='EOF' regexp='export PATH=$PATH:$JAVA_HOME/bin' state=present
+
+    - name: Adding SCALA_HOME in the /etc/profile
+      lineinfile: dest=/etc/profile line='export SCALA_HOME=/usr/share/scala-2.11' insertafter='EOF' regexp='export SCALA_HOME=/usr/share/scala-2.11' state=present
+
+    - name: Adding the path in the /etc/profile
+      lineinfile: dest=/etc/profile line='export PATH=$PATH:$SCALA_HOME/bin' insertafter='EOF' regexp='export PATH=$PATH:$SCALA_HOME/bin' state=present
+
+    - name: Adding MAVEN_HOME in the /etc/profile
+      lineinfile: dest=/etc/profile line='export MAVEN_HOME=/usr/share/maven' insertafter='EOF' regexp='export MAVEN_HOME=/usr/share/maven' state=present
+
+    - name: Adding the path in the /etc/profile
+      lineinfile: dest=/etc/profile line='export PATH=$PATH:$MAVEN_HOME/bin' insertafter='EOF' regexp='export PATH=$PATH:$MAVEN_HOME/bin' state=present
+
+    - name: Adding HADOOP_HOME in the /etc/profile
+      lineinfile: dest=/etc/profile line='export HADOOP_HOME={{hadoop_dir}}' insertafter='EOF' regexp='export HADOOP_HOME={{hadoop_dir}}' state=present
+
+    - name: Adding the path in the /etc/profile
+      lineinfile: dest=/etc/profile line='export PATH=$PATH:$HADOOP_HOME/bin' insertafter='EOF' regexp='export PATH=$PATH:$HADOOP_HOME/bin' state=present
+
+    - name: Adding HADOOP_COMMON_LIB_NATIVE_DIR in the /etc/profile
+      lineinfile: dest=/etc/profile line='export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native' insertafter='EOF' regexp='export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native' state=present
+    - name: Adding HADOOP_PREFIX in the /etc/profile
+      lineinfile: dest=/etc/profile line='export HADOOP_PREFIX=$HADOOP_HOME' insertafter='EOF' regexp='export HADOOP_PREFIX=$HADOOP_HOME' state=present
+    - name: Adding HADOOP_MAPRED_HOME in the /etc/profile
+      lineinfile: dest=/etc/profile line='export HADOOP_MAPRED_HOME=$HADOOP_HOME' insertafter='EOF' regexp='export HADOOP_MAPRED_HOME=$HADOOP_HOME' state=present
+    - name: Adding HADOOP_COMMON_HOME in the /etc/profile
+      lineinfile: dest=/etc/profile line='export HADOOP_COMMON_HOME=$HADOOP_HOME' insertafter='EOF' regexp='export HADOOP_COMMON_HOME=$HADOOP_HOME' state=present
+    - name: Adding HADOOP_HDFS_HOME in the /etc/profile
+      lineinfile: dest=/etc/profile line='export HADOOP_HDFS_HOME=$HADOOP_HOME' insertafter='EOF' regexp='export HADOOP_HDFS_HOME=$HADOOP_HOME' state=present
+    - name: Adding YARN_HOME in the /etc/profile
+      lineinfile: dest=/etc/profile line='export YARN_HOME=$HADOOP_HOME' insertafter='EOF' regexp='export YARN_HOME=$HADOOP_HOME' state=present
+    - name: Adding HADOOP_CONF_DIR in the /etc/profile
+      lineinfile: dest=/etc/profile line='export HADOOP_CONF_DIR=$HADOOP_HOME/conf' insertafter='EOF' regexp='export HADOOP_CONF_DIR=$HADOOP_HOME/conf' state=present
+    - name: Adding HDFS_CONF_DIR in the /etc/profile
+      lineinfile: dest=/etc/profile line='export HDFS_CONF_DIR=$HADOOP_HOME/conf' insertafter='EOF' regexp='export HDFS_CONF_DIR=$HADOOP_HOME/conf' state=present
+    - name: Adding YARN_CONF_DIR in the /etc/profile
+      lineinfile: dest=/etc/profile line='export YARN_CONF_DIR=$HADOOP_HOME/conf' insertafter='EOF' regexp='export YARN_CONF_DIR=$HADOOP_HOME/conf' state=present
+    - name: Adding JAVA_LIBRARY_PATH in the /etc/profile
+      lineinfile: dest=/etc/profile line='export JAVA_LIBRARY_PATH=$HADOOP_HOME/lib/native' insertafter='EOF' regexp='export JAVA_LIBRARY_PATH=$HADOOP_HOME/lib/native' state=present
+
 
 - hosts: journalnodes[0]
   user: ubuntu
@@ -118,7 +170,7 @@
     hadoop_dir: /root/hadoop-{{hadoop_version}}
   tasks:
     #- name: sync data to standby namenode
-    #  command: "{{hadoop_dir}}/bin/hdfs namenode –bootstrapStandby"
+    #  command: "{{hadoop_dir}}/bin/hdfs namenode -bootstrapStandby"
 
     #- name: start standby namenode
     #  command: "{{hadoop_dir}}/sbin/hadoop-daemon.sh start namenode"

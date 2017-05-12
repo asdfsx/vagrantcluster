@@ -1,0 +1,39 @@
+---
+
+- hosts: hue
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hue_version: 3.12.0
+    hue_dir: /root/hue-{{3.12.0}}
+    hue_tarball_dir: /home/ubuntu/share
+    hue_log_dir: /data/hue/log
+  tasks:
+    - name: install build-essential
+      command: apt-get install -y build-essential
+
+    - name: install python
+      command: apt-get install -y python-pip
+
+    - name: install pip
+      shell: pip install cloudpickle requests flake8 flaky pytest
+
+    #- name: get hue source code
+    #  command: creates={{ hue_tarball_dir }}/hue-{{hue_version}}.tgz chdir={{ hue_tarball_dir }} curl -o https://dl.dropboxusercontent.com/u/730827/hue/releases/{{hue_version}}/hue-{{hue_version}}.tgz
+    
+    #- name: Unpack tarball.
+    #  command: tar zxf {{hue_tarball_dir}}/hue-{{hue_version}}.tgz --strip-components=1 
+
+    #- name: install hue
+    #  command: PREFIX={{hue_dir}} make install
+
+    #- name: config hue
+    #  template: src={{ item }} dest="{{hue_dir}}/hue/desktop/conf{{ item }}" owner=root group=root mode=0644
+    #  with_items:
+    #    - hue.ini
+    #    - log.conf
+
+    #- name: start up
+    #  shell: nohup {{hue_dir}}/hue/build/env/bin/hue runserver 0.0.0.0:8888 &

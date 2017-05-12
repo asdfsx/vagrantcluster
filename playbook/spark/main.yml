@@ -13,11 +13,12 @@
       - host: "{{groups['hadoop']}}"
         id: 1
     spark_version: 2.1.0
-    spark_dir: /root/spark-{{hadoop_version}}
+    spark_dir: /root/spark-{{spark_version}}
     spark_tarball_dir: /home/ubuntu/share
+    spark_log_dir: /data/spark/log
   tasks:
     - name: "Ensure the tarball dir exists at {{hadoop_tarball_dir}}"
-      file: path={{hadoop_tarball_dir}} state=directory
+      file: path={{spark_tarball_dir}} state=directory
 
     - name: "Ensure the spark dir exists at {{spark_dir}}"
       file: path={{spark_dir}} state=directory   
@@ -28,102 +29,22 @@
     - name: Unpack tarball.
       command: tar zxf {{spark_tarball_dir}}/spark-{{spark_version}}-bin-hadoop2.7.tgz --strip-components=1 chdir={{spark_dir}} creates={{spark_dir}}/bin
 
-    - name: "Create hadoop {{item}} directory."
+    - name: "Create spark {{item}} directory."
       file: path={{item}} state=directory owner=root group=root
       tags: bootstrap
       with_items:
-        - "{{data_dir}}"
-        - "{{log_dir}}"
-        - "{{hadoop_conf_dir}}"
-        - "{{log_dir}}/hadoop-hdfs"
+        - "{{spark_log_dir}}"
 
-    - name: Config Hadoop
-      template: src={{ item }} dest="{{hadoop_dir}}/conf/{{ item }}" owner=root group=root mode=0644
+    - name: copy hadoop-lzo to spark_home
+      command: cp {{spark_tarball_dir}}/hadoop-lzo/hadoop-lzo-0.4.21-SNAPSHOT.jar {{spark_dir}}/jars
+
+    - name: Config Spark
+      template: src={{ item }} dest="{{spark_dir}}/conf/{{ item }}" owner=root group=root mode=0644
       with_items:
-        - core-site.xml
-        - hadoop-env.sh
-        - hadoop-metrics2.properties
-        - hdfs-site.xml
-        - org-xerial-snappy.properties
-        - slaves
-        - mapred-site.xml
-        - yarn-site.xml
-        - fair-scheduler.xml
-        - dfs.hosts.exclude
+        - spark-env.sh
+        - spark-default.conf
+        - hive-site.xml
 
-- hosts: namenodes[0]
-  user: ubuntu
-  become: yes
-  become_method : sudo
-  become_user: root
-  vars:
-    hadoop_version: 2.7.3
-    hadoop_dir: /root/hadoop-{{hadoop_version}}
-  tasks:
-    - name: "debug"
-      debug: msg="{{ hostvars[item] }}"
-      with_items: "{{ groups['journalnodes'] }}"
-      
-    - name: "start journal"
-      command: "{{ hadoop_dir}}/sbin/hadoop-daemons.sh start journalnode"
-
-    #- name: "format ha zk"
-    #  shell: "echo \"n\" |{{ hadoop_dir}}/bin/hdfs zkfc -formatZK"
-
-    #- name: "format hdfs"
-    #  command: "{{ hadoop_dir }}/bin/hdfs namenode -format -force"
-
-    #- name: "start namenode"
-    #  command: "{{ hadoop_dir }}/sbin/hadoop-daemon.sh start namenode"
-
-- hosts: namenodes[1]
-  user: ubuntu
-  become: yes
-  become_method : sudo
-  become_user: root
-  vars:
-    hadoop_version: 2.7.3
-    hadoop_dir: /root/hadoop-{{hadoop_version}}
-  tasks:
-    #- name: sync data to standby namenode
-    #  command: "{{hadoop_dir}}/bin/hdfs namenode –bootstrapStandby"
-
-    #- name: start standby namenode
-    #  command: "{{hadoop_dir}}/sbin/hadoop-daemon.sh start namenode"
-
-- hosts: datanodes
-  user: ubuntu
-  become: yes
-  become_method : sudo
-  become_user: root
-  vars:
-    hadoop_version: 2.7.3
-    hadoop_dir: /root/hadoop-{{hadoop_version}}
-  tasks:
-    - name: start datanode
-      command: "{{hadoop_dir}}/sbin/hadoop-daemons.sh start datanode"
-
-- hosts: resourcemanager
-  user: ubuntu
-  become: yes
-  become_method : sudo
-  become_user: root
-  vars:
-    hadoop_version: 2.7.3
-    hadoop_dir: /root/hadoop-{{hadoop_version}}
-  tasks:
-    - name: start yarn
-      command: "{{hadoop_dir}}/sbin/start-yarn.sh"
-
-- hosts: namenodes[0]
-  user: ubuntu
-  become: yes
-  become_method : sudo
-  become_user: root
-  vars:
-    hadoop_version: 2.7.3
-    hadoop_dir: /root/hadoop-{{hadoop_version}}
-  tasks:
-    - name: start zkfc
-      command: "{{hadoop_dir}}/sbin/hadoop-daemons.sh start zkfc"
+    - name: Adding SPARK_HOME in the /etc/profile
+      lineinfile: dest=/etc/profile line='export SPARK_HOME={{spark_dir}}' insertafter='EOF' regexp='export SPARK_HOME={{spark_dir}}' state=present
 

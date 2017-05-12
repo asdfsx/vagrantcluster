@@ -5,7 +5,6 @@ node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
 node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
 node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
 node3     ansible_connection=ssh        ansible_ssh_user=ubuntu
-node4     ansible_connection=ssh        ansible_ssh_user=ubuntu
 
 [namenodes]
 node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
@@ -14,7 +13,6 @@ node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
 [journalnodes]
 node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
 node3     ansible_connection=ssh        ansible_ssh_user=ubuntu
-node4     ansible_connection=ssh        ansible_ssh_user=ubuntu
 
 [historyserver]
 node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
@@ -22,10 +20,25 @@ node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
 [datanodes]
 node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
 node3     ansible_connection=ssh        ansible_ssh_user=ubuntu
-node4     ansible_connection=ssh        ansible_ssh_user=ubuntu
 
 [resourcemanager]
 node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
 
 [mysql]
 node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[hive]
+node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node3     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[spark]
+node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node3     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[hue]
+node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[livy]
+node2     ansible_connection=ssh        ansible_ssh_user=ubuntu

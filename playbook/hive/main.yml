@@ -1,0 +1,99 @@
+---
+
+- hosts: hive
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}} 
+    hadoop_conf_dir: "{{hadoop_dir}}/conf"
+    hadoop_hosts:
+      - host: "{{groups['hadoop']}}"
+        id: 1
+    hive_version: 2.1.1
+    hive_dir: /root/hive-{{hadoop_version}}
+    hive_tarball_dir: /home/ubuntu/share
+    hive_conf_dir: "{{hive_dir}}/conf"
+    hive_meta_database: hive_meta
+    hive_meta_user: hive
+    hive_meta_passwd: hive
+    hive_log_dir: /data/hive/log
+    hive_local_scratchdir_dir: /data/hive/scratchdir
+    hive_download_resource_dir: /data/hive/resource
+    hive_operation_log: "{{hive_log_dir}}/operation_logs"
+    hive_query_log: "{{hive_log_dir}}/query_logs"
+    spark_version: 2.1.0
+    spark_dir: /root/spark-{{spark_version}}
+
+  tasks:
+    - name: "Ensure the tarball dir exists at {{hive_tarball_dir}}"
+      file: path={{hive_tarball_dir}} state=directory
+
+    - name: "Ensure the hive dir exists at {{hive_dir}}"
+      file: path={{hive_dir}} state=directory  
+
+    - name: "Ensure the hive dir exists at {{hive_log_dir}}"
+      file: path={{hive_log_dir}} state=directory
+
+    - name: "Ensure the hive dir exists at {{hive_local_scratchdir_dir}}"
+      file: path={{hive_local_scratchdir_dir}} state=directory
+
+    - name: "Ensure the hive dir exists at {{hive_download_resource_dir}}"
+      file: path={{hive_download_resource_dir}} state=directory
+
+    - name: "Ensure the hive dir exists at {{hive_operation_log}}"
+      file: path={{hive_operation_log}} state=directory
+
+    - name: "Ensure the hive dir exists at {{hive_query_log}}"
+      file: path={{hive_query_log}} state=directory
+
+    - name: determine interface
+      set_fact: ipv4_address="{{ hostvars[inventory_hostname].ansible_enp0s8.ipv4.address }}"
+
+    - name: Unpack tarball.
+      command: tar zxf {{hive_tarball_dir}}/apache-hive-{{hive_version}}-bin.tar.gz --strip-components=1 chdir={{hive_dir}} creates={{hive_dir}}/bin
+
+    - name: download mysql driver
+      command: creates={{ hive_dir }}/lib/mysql-connector-java-5.1.42.jar chdir={{ hive_dir }}/lib/ curl -O http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.42/mysql-connector-java-5.1.42.jar
+
+    - name: config hive
+      template: src={{ item }} dest="{{hive_dir}}/conf/{{ item }}" owner=root group=root mode=0644
+      with_items:
+        - hive-site.xml
+        - hive-env.sh
+        - hive-log4j2.properties
+
+    - name: Adding HIVE_HOME in the /etc/profile
+      lineinfile: dest=/etc/profile line='export HIVE_HOME={{hive_dir}}' insertafter='EOF' regexp='export HIVE_HOME={{hive_dir}}' state=present
+    - name: Adding HIVE_HOME in the /etc/profile
+      lineinfile: dest=/etc/profile line='export PATH=$PATH:$HIVE_HOME/bin' insertafter='EOF' regexp='export PATH=$PATH:$HIVE_HOME/bin' state=present
+
+    #- name: create database on mysql
+    #  command: mysql -e "CREATE DATABASE IF NOT EXISTS `{{hive_meta_database}}` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;"
+
+    # since mysql 5.7.6 mariadb 10.1.3 support "create user if not exists", we can use "create user if not exists", so that we don't need to comment
+    #- name: create user hive on mysql
+    #  command: mysql -e "CREATE USER '{{hive_meta_user}}'@'%' IDENTIFIED BY '{{hive_meta_passwd}}';"
+
+    #- name: grant privileges
+    #  command: mysql -e "GRANT all ON {{hive_meta_database}}.* TO '{{hive_meta_user}}'@'%' IDENTIFIED by '{{hive_meta_passwd}}';"
+
+    # only initschema once 
+    #- name: init hive
+    #  command: "{{hive_dir}}/bin/schematool -dbType mysql -initSchema"
+
+    #- name: delete slf4j to solve multiple binding problem
+    #  command: rm {{hive_dir}}/lib/log4j-slf4j-impl-2.4.1.jar
+
+    #- name: start hive metastore
+    #  shell: "nohup {{hive_dir}}/bin/hive --service metastore &"
+
+    - name: spark sql support
+      template: src={{ item }} dest="{{spark_dir}}/conf/{{ item }}" owner=root group=root mode=0644
+      with_items:
+        - hive-site.xml
+    
+    - name: download mysql driver for spark sql
+      command: creates={{ spark_dir }}/jars/mysql-connector-java-5.1.42.jar chdir={{ spark_dir }}/jars/ curl -O http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.42/mysql-connector-java-5.1.42.jar
