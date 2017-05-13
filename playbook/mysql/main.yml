@@ -16,7 +16,7 @@
     - name: restart mysql
       command: systemctl restart mysql
 
-- host: all
+- hosts: all
   user: ubuntu
   become: yes
   become_method : sudo

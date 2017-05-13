@@ -23,6 +23,7 @@
 # HttpFS logs directory
 #
 # export HTTPFS_LOG=${HTTPFS_HOME}/logs
+export HTTPFS_LOG={{log_dir}}/logs
 
 # HttpFS temporary directory
 #
