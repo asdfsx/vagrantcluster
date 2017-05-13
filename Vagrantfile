@@ -26,8 +26,10 @@ Vagrant.configure("2") do |config|
         sudo apt-get -y install openjdk-8-jdk
         sudo apt-get -y install scala
         sudo apt-get -y install maven
-        sudo apt-get -y install python-minimal python2.7 python-pip
+        sudo apt-get -y install python-minimal python2.7 python-pip python-dev python-setuptools
         sudo apt-get -y install r-base
+        sudo apt-get -y install libkrb5-dev libffi-dev libmysqlclient-dev libssl-dev libsasl2-dev libsasl2-modules-gssapi-mit libsqlite3-dev libtidy-0.99-0 libxml2-dev libxslt-devs libldap2-dev  libgmp3-dev
+        sudo apt-get -y install libsnappy1v5 libsnappy-dev liblzo2-2 liblzo2-dev lzop
       SHELL
     end
   end

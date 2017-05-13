@@ -46,8 +46,9 @@ native 需要放到 $HADOOP_HOME/lib/native 里。
 `ansible-playbook -i inventory playbook/hive/main.yml`
 初始化的那些命令，可能还是手动执行比较好
 
+注意，现在的配置里已经增加了 hive.metastore.uris 的配置。也就是说，hive启动的时候要从 metastore 中获取信息。
 启动metastore `nohup bin/hive --service metastore &`
-
+然后就可以启动 hive 了 `bin/hive`
 
 测试 lzo
 ```
@@ -72,26 +73,6 @@ spark 配置好以后，用下边的命令进行测试
 
 启动 spark sql 需要先安装 hive。相当于 spark sql 是 hive 的一个查询引擎。spark sql 通过 hive 的metastore 来获取hive的元数据。
 
-hive 安装并测试好以后，在hive-site.xml 中增加 hive.metastore.uris 的配置。
-增加 hive.metastore.uris 的配置以后，hive 也需要通过 metastore 来获取元数据。如果 metastore 没有启动，那么 hive 也会失败。
-启动metastore
-
-```
-bin/hive --service metastore
-```
-
-这个时候 hive 也可以正常启动了。
-当 lzo 正确配置以后，用下边的 sql 进行测试。
-
-```
-create table lzo(
-id int,
-name string)
-STORED AS INPUTFORMAT 'com.hadoop.mapred.DeprecatedLzoTextInputFormat'
-OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat';
-```
-
-
 然后是 spark sql ，以下为个人猜测。
 由于 spark 内置的 hive 客户端为 1.2.1，而我这里用的 hive 是2.1。可能新版本里有很多配置项是老版没有的，导致读取最新版的 hive-site 失败。
 解决办法是，spark 中新建一个 hive-site，而不是将 hive 中的 hive-site 直接 copy 过来。新建的 hive-site 中，只有一个配置就是 hive.metastore.uris。
@@ -106,7 +87,9 @@ OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat';
 ```
 
 之后就可以启动 spark sql 了。但是貌似目前还不能支持 lzo。需要将之前编译好的 jar 包 copy 到 $SPARK_HOME/jars 中。现在 lzo 也 ok 了。
-
+```
+bin/spark-sql --master yarn --deploy-mode client --executor-memory 512m --executor-cores 1
+```
 
 # 安装hue
 没有编译好之后的，只能自己编译～～～FUCK

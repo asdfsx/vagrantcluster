@@ -39,9 +39,6 @@
       command: tar zxf {{hadoop_tarball_dir}}/hadoop-{{hadoop_version}}.tar.gz --strip-components=1 chdir={{hadoop_dir}} creates={{hadoop_dir}}/bin
       tags: bootstrap
 
-    - name: "install liblzo2"
-      command: apt-get -y install libsnappy1v5 libsnappy-dev liblzo2-2 liblzo2-dev lzop
-
     #- name: "download hadoop-lzo"
     #  command: creates={{ hadoop_dir }}/share/hadoop/common/lib/hadoop-lzo-0.4.15-gplextras5.0.0.jar chdir={{ hadoop_dir }}/share/hadoop/common/lib/ curl -O http://repo.spring.io/plugins-release/com/hadoop/gplcompression/hadoop-lzo/0.4.15-gplextras5.0.0/hadoop-lzo-0.4.15-gplextras5.0.0.jar
 

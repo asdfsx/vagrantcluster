@@ -70,3 +70,5 @@ export SCALA_HOME=/usr/share/scala-2.11
 export HADOOP_HOME={{hadoop_dir}}
 export SPARK_LOG_DIR={{spark_log_dir}}
 export SPARK_HOME={{spark_dir}}
+export HADOOP_CONF_DIR=$HADOOP_HOME/conf
+export YARN_CONF_DIR=$HADOOP_HOME/conf

@@ -44,7 +44,5 @@
         - spark-env.sh
         - spark-default.conf
         - hive-site.xml
-
-    - name: Adding SPARK_HOME in the /etc/profile
-      lineinfile: dest=/etc/profile line='export SPARK_HOME={{spark_dir}}' insertafter='EOF' regexp='export SPARK_HOME={{spark_dir}}' state=present
-
+    - name: download mysql driver for spark sql
+      command: creates={{ spark_dir }}/jars/mysql-connector-java-5.1.42.jar chdir={{ spark_dir }}/jars/ curl -O http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.42/mysql-connector-java-5.1.42.jar
