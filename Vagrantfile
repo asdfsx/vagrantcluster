@@ -22,10 +22,12 @@ Vagrant.configure("2") do |config|
         sudo su -c "cat /home/ubuntu/share/authorized_keys >> /home/ubuntu/.ssh/authorized_keys"
         sudo su -c "cat /home/ubuntu/share/hosts >> /etc/hosts"
         sudo apt-get update
+        sudo apt-get install -y build-essential
         sudo apt-get -y install openjdk-8-jdk
         sudo apt-get -y install scala
         sudo apt-get -y install maven
-        sudo apt-get -y install python-minimal python2.7
+        sudo apt-get -y install python-minimal python2.7 python-pip
+        sudo apt-get -y install r-base
       SHELL
     end
   end

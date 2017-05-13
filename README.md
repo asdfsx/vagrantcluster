@@ -1,6 +1,14 @@
 # vagrantcluster
 
-vagrant 启动虚拟机的时候，将hosts文件同步到各个虚拟机。所以在ansible的配置中，可以直接使用主机而不是 ip 地址.
+vagrant up 初次启动虚拟机的时候，会尽可能的用 apt 安装依赖软件。
+
+初次启动之后，最好直接创建备份 `vagrant snapshot push`，方便之后回退。
+
+启动虚拟机时，将hosts文件同步到各个虚拟机。所以在ansible的配置中，可以直接使用主机而不是 ip 地址。
+
+启动虚拟机时，会将 share/authorized_keys 的内容添加到各个虚拟机上。所以启动后可以直接`ssh ubuntu@node1`。但是注意要根据情况清空宿主机上 ~/.ssh/known_hosts 中的内容。
+
+启动之后，使用 `ansible-playbook -i inventory playbook/init/main.yml` 给每个机器做个 ssh-key 的初始化，让服务器之间可以直接用ssh登录。清除 /etc/hosts 中 127.0.0.1 的配置。更新 mavne 的远程库配置
 
 hadoop配置了HA，所以namenode的个数至少是2个
 
