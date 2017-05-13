@@ -8,15 +8,25 @@ vagrant up 初次启动虚拟机的时候，会尽可能的用 apt 安装依赖�
 
 启动虚拟机时，会将 share/authorized_keys 的内容添加到各个虚拟机上。所以启动后可以直接`ssh ubuntu@node1`。但是注意要根据情况清空宿主机上 ~/.ssh/known_hosts 中的内容。
 
-启动之后，使用 `ansible-playbook -i inventory playbook/init/main.yml` 给每个机器做个 ssh-key 的初始化，让服务器之间可以直接用ssh登录。清除 /etc/hosts 中 127.0.0.1 的配置。更新 mavne 的远程库配置
+启动之后，使用 `ansible-playbook -i inventory playbook/init/main.yml` 给每个机器做个 ssh-key 的初始化，让服务器之间可以直接用ssh登录。清除 /etc/hosts 中 127.0.0.1 的配置。更新 maven 的远程库配置。
+
+首先，启动zookeeper，使用 `ansible-playbook -i inventory playbook/zookeeper/main.yml` 
 
 hadoop配置了HA，所以namenode的个数至少是2个
 
 貌似journalnode 必须是在datanode上。如果datandoe为2个，那么即使journalnode里配置了3个，最后也会启动2个。
 
-namenode format 之前貌似需要启动jounalnode，可能会有数据传递
+namenode format 之前貌似需要启动jounalnode，可能会有数据传递。
 
-secondary namenode 貌似手动启动是最靠谱的，而且好像也不需要执行bootstrap那个命令了
+启动流程大概是这样的
+启动journalnodes -> format 主namenode -> 启动主namenode -> bootstrapStandby 从namenode -> 启动从 namenode -> 启动 datanode
+
+如果这个时候不启动 zkfc 的话，会发现两个 namenode 都是 standby 。启动 zkfc 以后，其中一个会 active。
+
+为了支持 hue，启动 webhdfs。单独启动 webhdfs 的服务原因是 增加 ha 的支持以后，active 节点会自动漂，所以不能直接使用 node1:50070 这样的配置。
+启动的时候，指定配置文件所在的路径 `HTTPFS_CONFIG="/root/hadoop-2.7.3/conf" sbin/httpfs.sh start`
+可以用 `http://node1:14000/webhdfs/v1/user/root?op=GETFILESTATUS&user.name=root&doas=root` 这个地址来测试一下 httpfs 是否正常。
+不过在测试之前要在 hdfs 上创建 `/user/root` 目录
 
 关于lzo，最后还是从 github 上 clone 了 twitter 的代码，然后编译了一份，编译结果放在share里，希望能够重用。
 lzo的支持需要两部分，一部分是 java实现的 jar 包，另一部分是 c 实现的 native 库。

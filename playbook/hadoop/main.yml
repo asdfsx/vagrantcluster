@@ -31,9 +31,6 @@
 
     - name: "Ensure the hadoop dir exists at {{hadoop_dir}}"
       file: path={{hadoop_dir}} state=directory
-    
-    - name: "Ensure /etc/hosts dont have 127.0.0.1 node1 config"
-      command: sed -i '/^127.0.0.1.*node/d' /etc/hosts
 
     - name: determine interface
       set_fact: ipv4_address="{{ hostvars[inventory_hostname].ansible_enp0s8.ipv4.address }}"
@@ -87,54 +84,6 @@
         - httpfs-env.sh
         - httpfs-signature.secret
 
-    - name: Adding JAVA_HOME in the /etc/profile
-      lineinfile: dest=/etc/profile line='export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre' insertafter='EOF' regexp='export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64' state=present
-
-    - name: Adding the path in the /etc/profile
-      lineinfile: dest=/etc/profile line='export PATH=$PATH:$JAVA_HOME/bin' insertafter='EOF' regexp='export PATH=$PATH:$JAVA_HOME/bin' state=present
-
-    - name: Adding SCALA_HOME in the /etc/profile
-      lineinfile: dest=/etc/profile line='export SCALA_HOME=/usr/share/scala-2.11' insertafter='EOF' regexp='export SCALA_HOME=/usr/share/scala-2.11' state=present
-
-    - name: Adding the path in the /etc/profile
-      lineinfile: dest=/etc/profile line='export PATH=$PATH:$SCALA_HOME/bin' insertafter='EOF' regexp='export PATH=$PATH:$SCALA_HOME/bin' state=present
-
-    - name: Adding MAVEN_HOME in the /etc/profile
-      lineinfile: dest=/etc/profile line='export MAVEN_HOME=/usr/share/maven' insertafter='EOF' regexp='export MAVEN_HOME=/usr/share/maven' state=present
-
-    - name: Adding the path in the /etc/profile
-      lineinfile: dest=/etc/profile line='export PATH=$PATH:$MAVEN_HOME/bin' insertafter='EOF' regexp='export PATH=$PATH:$MAVEN_HOME/bin' state=present
-
-    - name: Adding HADOOP_HOME in the /etc/profile
-      lineinfile: dest=/etc/profile line='export HADOOP_HOME={{hadoop_dir}}' insertafter='EOF' regexp='export HADOOP_HOME={{hadoop_dir}}' state=present
-
-    - name: Adding the path in the /etc/profile
-      lineinfile: dest=/etc/profile line='export PATH=$PATH:$HADOOP_HOME/bin' insertafter='EOF' regexp='export PATH=$PATH:$HADOOP_HOME/bin' state=present
-
-    - name: Adding HADOOP_COMMON_LIB_NATIVE_DIR in the /etc/profile
-      lineinfile: dest=/etc/profile line='export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native' insertafter='EOF' regexp='export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native' state=present
-    - name: Adding HADOOP_PREFIX in the /etc/profile
-      lineinfile: dest=/etc/profile line='export HADOOP_PREFIX=$HADOOP_HOME' insertafter='EOF' regexp='export HADOOP_PREFIX=$HADOOP_HOME' state=present
-    - name: Adding HADOOP_MAPRED_HOME in the /etc/profile
-      lineinfile: dest=/etc/profile line='export HADOOP_MAPRED_HOME=$HADOOP_HOME' insertafter='EOF' regexp='export HADOOP_MAPRED_HOME=$HADOOP_HOME' state=present
-    - name: Adding HADOOP_COMMON_HOME in the /etc/profile
-      lineinfile: dest=/etc/profile line='export HADOOP_COMMON_HOME=$HADOOP_HOME' insertafter='EOF' regexp='export HADOOP_COMMON_HOME=$HADOOP_HOME' state=present
-    - name: Adding HADOOP_HDFS_HOME in the /etc/profile
-      lineinfile: dest=/etc/profile line='export HADOOP_HDFS_HOME=$HADOOP_HOME' insertafter='EOF' regexp='export HADOOP_HDFS_HOME=$HADOOP_HOME' state=present
-    - name: Adding YARN_HOME in the /etc/profile
-      lineinfile: dest=/etc/profile line='export YARN_HOME=$HADOOP_HOME' insertafter='EOF' regexp='export YARN_HOME=$HADOOP_HOME' state=present
-    - name: Adding HADOOP_CONF_DIR in the /etc/profile
-      lineinfile: dest=/etc/profile line='export HADOOP_CONF_DIR=$HADOOP_HOME/conf' insertafter='EOF' regexp='export HADOOP_CONF_DIR=$HADOOP_HOME/conf' state=present
-    - name: Adding HDFS_CONF_DIR in the /etc/profile
-      lineinfile: dest=/etc/profile line='export HDFS_CONF_DIR=$HADOOP_HOME/conf' insertafter='EOF' regexp='export HDFS_CONF_DIR=$HADOOP_HOME/conf' state=present
-    - name: Adding YARN_CONF_DIR in the /etc/profile
-      lineinfile: dest=/etc/profile line='export YARN_CONF_DIR=$HADOOP_HOME/conf' insertafter='EOF' regexp='export YARN_CONF_DIR=$HADOOP_HOME/conf' state=present
-    - name: Adding JAVA_LIBRARY_PATH in the /etc/profile
-      lineinfile: dest=/etc/profile line='export JAVA_LIBRARY_PATH=$HADOOP_HOME/lib/native' insertafter='EOF' regexp='export JAVA_LIBRARY_PATH=$HADOOP_HOME/lib/native' state=present
-    - name: Adding HTTPFS_CONFIG in the /etc/profile
-      lineinfile: dest=/etc/profile line='export HTTPFS_CONFIG=$HADOOP_HOME/conf' insertafter='EOF' regexp='export HTTPFS_CONFIG=$HADOOP_HOME/conf' state=present
-
-
 - hosts: journalnodes[0]
   user: ubuntu
   become: yes
@@ -166,7 +115,7 @@
     #  command: "{{ hadoop_dir }}/sbin/hadoop-daemon.sh start namenode"
 
     #- name: "start httpfs"
-    #  command: "{{ hadoop_dir }}/sbin/httpfs.sh start"
+    #  command: "HTTPFS_CONFIG="{{hadoop_dir}}/conf" {{ hadoop_dir }}/sbin/httpfs.sh start"
 
 - hosts: namenodes[1]
   user: ubuntu
@@ -218,3 +167,4 @@
   tasks:
     #- name: start yarn
     #  command: "{{hadoop_dir}}/sbin/start-yarn.sh"
+
