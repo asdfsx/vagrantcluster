@@ -65,13 +65,13 @@
         - hive-env.sh
         - hive-log4j2.properties
 
-    - name: Adding HIVE_HOME in the /etc/profile
-      lineinfile: dest=/etc/profile line='export HIVE_HOME={{hive_dir}}' insertafter='EOF' regexp='export HIVE_HOME={{hive_dir}}' state=present
-    - name: Adding HIVE_HOME in the /etc/profile
-      lineinfile: dest=/etc/profile line='export PATH=$PATH:$HIVE_HOME/bin' insertafter='EOF' regexp='export PATH=$PATH:$HIVE_HOME/bin' state=present
+    #- name: Adding HIVE_HOME in the /etc/profile
+    #  lineinfile: dest=/etc/profile line='export HIVE_HOME={{hive_dir}}' insertafter='EOF' regexp='export HIVE_HOME={{hive_dir}}' state=present
+    #- name: Adding HIVE_HOME in the /etc/profile
+    #  lineinfile: dest=/etc/profile line='export PATH=$PATH:$HIVE_HOME/bin' insertafter='EOF' regexp='export PATH=$PATH:$HIVE_HOME/bin' state=present
 
     #- name: create database on mysql
-    #  command: mysql -e "CREATE DATABASE IF NOT EXISTS `{{hive_meta_database}}` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;"
+    #  command: mysql -e "CREATE DATABASE IF NOT EXISTS {{hive_meta_database}} DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;"
 
     # since mysql 5.7.6 mariadb 10.1.3 support "create user if not exists", we can use "create user if not exists", so that we don't need to comment
     #- name: create user hive on mysql
@@ -90,10 +90,10 @@
     #- name: start hive metastore
     #  shell: "nohup {{hive_dir}}/bin/hive --service metastore &"
 
-    - name: spark sql support
-      template: src={{ item }} dest="{{spark_dir}}/conf/{{ item }}" owner=root group=root mode=0644
-      with_items:
-        - hive-site.xml
+    # - name: spark sql support
+    #  template: src={{ item }} dest="{{spark_dir}}/conf/{{ item }}" owner=root group=root mode=0644
+    #  with_items:
+    #    - hive-site.xml
     
-    - name: download mysql driver for spark sql
-      command: creates={{ spark_dir }}/jars/mysql-connector-java-5.1.42.jar chdir={{ spark_dir }}/jars/ curl -O http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.42/mysql-connector-java-5.1.42.jar
+    #- name: download mysql driver for spark sql
+    #  command: creates={{ spark_dir }}/jars/mysql-connector-java-5.1.42.jar chdir={{ spark_dir }}/jars/ curl -O http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.42/mysql-connector-java-5.1.42.jar

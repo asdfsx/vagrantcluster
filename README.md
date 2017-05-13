@@ -1,5 +1,6 @@
 # vagrantcluster
 
+### 启动虚拟机
 vagrant up 初次启动虚拟机的时候，会尽可能的用 apt 安装依赖软件。
 
 初次启动之后，最好直接创建备份 `vagrant snapshot push`，方便之后回退。
@@ -8,10 +9,13 @@ vagrant up 初次启动虚拟机的时候，会尽可能的用 apt 安装依赖�
 
 启动虚拟机时，会将 share/authorized_keys 的内容添加到各个虚拟机上。所以启动后可以直接`ssh ubuntu@node1`。但是注意要根据情况清空宿主机上 ~/.ssh/known_hosts 中的内容。
 
+### 初始化环境
 启动之后，使用 `ansible-playbook -i inventory playbook/init/main.yml` 给每个机器做个 ssh-key 的初始化，让服务器之间可以直接用ssh登录。清除 /etc/hosts 中 127.0.0.1 的配置。更新 maven 的远程库配置。
 
-首先，启动zookeeper，使用 `ansible-playbook -i inventory playbook/zookeeper/main.yml` 
+### 安装 zookeeper
+`ansible-playbook -i inventory playbook/zookeeper/main.yml`
 
+### 安装 hadoop
 hadoop配置了HA，所以namenode的个数至少是2个
 
 貌似journalnode 必须是在datanode上。如果datandoe为2个，那么即使journalnode里配置了3个，最后也会启动2个。
@@ -28,11 +32,35 @@ namenode format 之前貌似需要启动jounalnode，可能会有数据传递。
 可以用 `http://node1:14000/webhdfs/v1/user/root?op=GETFILESTATUS&user.name=root&doas=root` 这个地址来测试一下 httpfs 是否正常。
 不过在测试之前要在 hdfs 上创建 `/user/root` 目录
 
+都完成之后，可以用 stop-all.sh、start-all.sh 来重启所有服务，再次验证配置。
+
 关于lzo，最后还是从 github 上 clone 了 twitter 的代码，然后编译了一份，编译结果放在share里，希望能够重用。
 lzo的支持需要两部分，一部分是 java实现的 jar 包，另一部分是 c 实现的 native 库。
 jar 需要放到 $HADOOP_HOME/share/hadoop/common 里。
 native 需要放到 $HADOOP_HOME/lib/native 里。
 
+### 安装 mysql
+`ansible-playbook -i inventory playbook/mysql/main.yml`
+
+### 安装 hive
+`ansible-playbook -i inventory playbook/hive/main.yml`
+初始化的那些命令，可能还是手动执行比较好
+
+启动metastore `nohup bin/hive --service metastore &`
+
+
+测试 lzo
+```
+create table lzo(
+id int,
+name string)
+STORED AS INPUTFORMAT 'com.hadoop.mapred.DeprecatedLzoTextInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat';
+```
+
+
+### 安装 spark
+`ansible-playbook -i inventory playbook/spark/main.yml`
 spark 配置好以后，用下边的命令进行测试
 
 ```

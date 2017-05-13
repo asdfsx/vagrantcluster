@@ -29,8 +29,6 @@ node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
 
 [hive]
 node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
-node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
-node3     ansible_connection=ssh        ansible_ssh_user=ubuntu
 
 [spark]
 node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
