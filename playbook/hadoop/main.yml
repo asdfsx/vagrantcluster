@@ -83,6 +83,9 @@
         - yarn-site.xml
         - fair-scheduler.xml
         - dfs.hosts.exclude
+        - httpfs-site.xml
+        - httpfs-env.sh
+        - httpfs-signature.secret
 
     - name: Adding JAVA_HOME in the /etc/profile
       lineinfile: dest=/etc/profile line='export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre' insertafter='EOF' regexp='export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64' state=present
@@ -128,6 +131,8 @@
       lineinfile: dest=/etc/profile line='export YARN_CONF_DIR=$HADOOP_HOME/conf' insertafter='EOF' regexp='export YARN_CONF_DIR=$HADOOP_HOME/conf' state=present
     - name: Adding JAVA_LIBRARY_PATH in the /etc/profile
       lineinfile: dest=/etc/profile line='export JAVA_LIBRARY_PATH=$HADOOP_HOME/lib/native' insertafter='EOF' regexp='export JAVA_LIBRARY_PATH=$HADOOP_HOME/lib/native' state=present
+    - name: Adding HTTPFS_CONFIG in the /etc/profile
+      lineinfile: dest=/etc/profile line='export HTTPFS_CONFIG=$HADOOP_HOME/conf' insertafter='EOF' regexp='export HTTPFS_CONFIG=$HADOOP_HOME/conf' state=present
 
 
 - hosts: journalnodes[0]
@@ -159,6 +164,9 @@
 
     #- name: "start namenode"
     #  command: "{{ hadoop_dir }}/sbin/hadoop-daemon.sh start namenode"
+
+    #- name: "start httpfs"
+    #  command: "{{ hadoop_dir }}/sbin/httpfs.sh start"
 
 - hosts: namenodes[1]
   user: ubuntu
@@ -210,4 +218,3 @@
   tasks:
     #- name: start yarn
     #  command: "{{hadoop_dir}}/sbin/start-yarn.sh"
-

@@ -103,7 +103,11 @@ nohup bin/hive --service metastore &
 nohup bin/hive --service hiveserver2 &
 ```
 
-然后修改 
+注意如果要让 hue 支持 namenode ha，需要单独启动一个 httpfs 服务
+
+安装编译 livy，它是 hue 和 spark 的一个桥梁。
+花了4个小时，依赖项太多。
+编译完成后，配置到 hue 中，然后启动服务。
 
 
 参考文章：  
