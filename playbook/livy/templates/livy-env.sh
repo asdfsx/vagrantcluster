@@ -33,3 +33,4 @@
 # - LIVY_NICENESS   Niceness of the Livy server process when running in the background. (Default: 0.)
 JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 LIVY_LOG_DIR={{livy_log_dir}}
+SPARK_HOME={{spark_dir}}

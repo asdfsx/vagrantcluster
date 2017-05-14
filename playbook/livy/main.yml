@@ -6,13 +6,16 @@
   become_method : sudo
   become_user: root
   vars:
-    livy_version: 3.12.0
+    livy_version: 0.3.0
     livy_dir: /root/livy-{{livy_version}}
     livy_tarball_dir: /home/ubuntu/share
     livy_log_dir: /data/livy/log
+
+    spark_version: 2.1.0
+    spark_dir: /root/spark-{{spark_version}}
   tasks:
-    - name: install build-essential pip r-project
-      command: apt-get install -y build-essential python-pip r-base
+    - name: "Ensure the livy dir exists at {{livy_dir}}"
+      file: path={{livy_dir}} state=directory
 
     - name: install pip
       shell: pip install cloudpickle requests flake8 flaky pytest requests-kerberos configparser responses pytest_runner future
@@ -21,10 +24,10 @@
     #  command: creates={{ livy_tarball_dir }}/livy-{{livy_version}}.tar.gz chdir={{ livy_tarball_dir }} curl -o https://github.com/cloudera/livy/archive/v0.3.0.tar.gz
     
     - name: Unpack tarball.
-      command: chdir={{ livy_dir }} creates={{ livy_dir }} tar zxf {{ livy_tarball_dir }}/livy-{{livy_version}}.tar.gz --strip-components=1 
+      command: tar zxf {{ livy_tarball_dir }}/livy-{{livy_version}}.tar.gz --strip-components=1  chdir={{ livy_dir }}
 
     - name: build livy
-      command: chdir={{ livy_dir }} mvn -Dmaven.test.skip clean package
+      shell: chdir={{ livy_dir }} mvn -Dmaven.test.skip clean package
 
     - name: "Ensure the livy_log_dir dir exists at {{livy_log_dir}}"
       file: path={{livy_log_dir}} state=directory
@@ -35,5 +38,8 @@
         - spark-blacklist.conf
         - livy-env.sh
 
+    - name: stop livy
+      command: nohup {{livy_dir}}/bin/livy-server stop &
+
     - name: start livy
-      command: nohup {{livy_dir}}/bin/livy-server &
+      command: nohup {{livy_dir}}/bin/livy-server start &
