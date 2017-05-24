@@ -1,0 +1,48 @@
+---
+
+- hosts: spark
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}} 
+    hadoop_conf_dir: "{{hadoop_dir}}/conf"
+    hadoop_hosts:
+      - host: "{{groups['hadoop']}}"
+        id: 1
+    spark_version: 2.1.0
+    spark_dir: /root/spark-{{spark_version}}
+    spark_tarball_dir: /home/ubuntu/share
+    spark_log_dir: /data/spark/log
+  tasks:
+    - name: "Ensure the tarball dir exists at {{hadoop_tarball_dir}}"
+      file: path={{spark_tarball_dir}} state=directory
+
+    - name: "Ensure the spark dir exists at {{spark_dir}}"
+      file: path={{spark_dir}} state=directory   
+
+    - name: determine interface
+      set_fact: ipv4_address="{{ hostvars[inventory_hostname].ansible_enp0s8.ipv4.address }}"
+
+    - name: Unpack tarball.
+      command: tar zxf {{spark_tarball_dir}}/spark-{{spark_version}}-bin-hadoop2.7.tgz --strip-components=1 chdir={{spark_dir}} creates={{spark_dir}}/bin
+
+    - name: "Create spark {{item}} directory."
+      file: path={{item}} state=directory owner=root group=root
+      tags: bootstrap
+      with_items:
+        - "{{spark_log_dir}}"
+
+    - name: copy hadoop-lzo to spark_home
+      command: cp {{spark_tarball_dir}}/hadoop-lzo/hadoop-lzo-0.4.21-SNAPSHOT.jar {{spark_dir}}/jars
+
+    - name: Config Spark
+      template: src={{ item }} dest="{{spark_dir}}/conf/{{ item }}" owner=root group=root mode=0644
+      with_items:
+        - spark-env.sh
+        - spark-default.conf
+        - hive-site.xml
+    - name: download mysql driver for spark sql
+      command: creates={{ spark_dir }}/jars/mysql-connector-java-5.1.42.jar chdir={{ spark_dir }}/jars/ curl -O http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.42/mysql-connector-java-5.1.42.jar

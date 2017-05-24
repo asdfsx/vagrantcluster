@@ -1,0 +1,52 @@
+---
+
+- hosts: zookeepers
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    data_dir: /data/zookeeper/data
+    log_dir: /data/zookeeper/log
+    
+    client_port: 2181
+    init_limit: 5
+    sync_limit: 2
+    tick_time: 2000
+    zookeeper_autopurge_purgeInterval: 0
+    zookeeper_autopurge_snapRetainCount: 10
+
+    zookeeper_version: 3.4.10
+    zookeeper_dir: /root/zookeeper-{{zookeeper_version}} 
+    zookeeper_conf_dir: "{{zookeeper_dir}}"
+    zookeeper_tarball_dir: /home/ubuntu/share
+    zookeeper_force_myid: yes
+    zookeeper_hosts: "{{groups['zookeepers']}}"
+  tasks:
+    - name: "Ensure the tarball dir exists at {{zookeeper_tarball_dir}}"
+      file: path={{zookeeper_tarball_dir}} state=directory
+
+    - name: "Ensure the zookeeper dir exists at {{zookeeper_dir}}"
+      file: path={{zookeeper_dir}} state=directory
+
+    - name: Unpack tarball.
+      command: tar zxf {{zookeeper_tarball_dir}}/zookeeper-{{zookeeper_version}}.tar.gz --strip-components=1 chdir={{zookeeper_dir}} creates={{zookeeper_dir}}/bin
+      tags: bootstrap
+
+    - name: "Create zookeeper {{item}} directory."
+      file: path={{item}} state=directory owner=root group=root
+      tags: bootstrap
+      with_items:
+        - "{{data_dir}}"
+        - "{{log_dir}}"
+
+    - name: Write myid file.
+      template: src=myid.j2 dest={{data_dir}}/myid owner=root group=root force="{{ zookeeper_force_myid }}"
+      tags: deploy
+
+    - name: Configure zookeeper zoo.cfg
+      template: src=zoo.cfg.j2 dest={{ zookeeper_dir }}/conf/zoo.cfg owner=root group=root
+      tags: deploy
+
+    - name: restart zookeeper
+      command: "{{ zookeeper_dir }}/bin/zkServer.sh restart"

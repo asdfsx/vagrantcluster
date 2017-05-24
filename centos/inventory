@@ -1,0 +1,42 @@
+[zookeepers]
+centos1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[hadoop]
+centos1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+centos2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+centos3     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[namecentoss]
+centos1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+centos2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[journalcentoss]
+centos2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+centos3     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[historyserver]
+centos2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[datacentoss]
+centos2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+centos3     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[resourcemanager]
+centos1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[mysql]
+centos1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[hive]
+centos1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[spark]
+centos1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+centos2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+centos3     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[hue]
+centos2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[livy]
+centos2     ansible_connection=ssh        ansible_ssh_user=ubuntu

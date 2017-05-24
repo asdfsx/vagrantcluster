@@ -1,0 +1,167 @@
+---
+
+- hosts: hadoop
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    dfs_blocksize: 16777216
+    max_xcievers: 64
+    data_dir: /data/hadoop
+    dfs_dn_dir: /data/hadoop/dfs/dn
+    dfs_nn_dir: /data/hadoop/dfs/nn
+    qjournal_dir: /data/hadoop/qjournal
+    log_dir: /data/hadoop/log
+    socket_dir: /data/hadoop/socket
+    yarn_app_log_dir: /data/hadoop/yarn/apps
+    yarn_data_local: /data/hadoop/yarn/local
+    yarn_data_log: /data/hadoop/yarn/logs
+    site_name: hadoop4test   
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}} 
+    hadoop_conf_dir: "{{hadoop_dir}}/conf"
+    hadoop_tarball_dir: /home/ubuntu/share
+    hadoop_hosts:
+      - host: "{{groups['hadoop']}}"
+        id: 1
+  tasks:
+    - name: "Ensure the tarball dir exists at {{hadoop_tarball_dir}}"
+      file: path={{hadoop_tarball_dir}} state=directory
+
+    - name: "Ensure the hadoop dir exists at {{hadoop_dir}}"
+      file: path={{hadoop_dir}} state=directory
+
+    - name: determine interface
+      set_fact: ipv4_address="{{ hostvars[inventory_hostname].ansible_enp0s8.ipv4.address }}"
+
+    - name: Unpack tarball.
+      command: tar zxf {{hadoop_tarball_dir}}/hadoop-{{hadoop_version}}.tar.gz --strip-components=1 chdir={{hadoop_dir}} creates={{hadoop_dir}}/bin
+      tags: bootstrap
+
+    #- name: "download hadoop-lzo"
+    #  command: creates={{ hadoop_dir }}/share/hadoop/common/lib/hadoop-lzo-0.4.15-gplextras5.0.0.jar chdir={{ hadoop_dir }}/share/hadoop/common/lib/ curl -O http://repo.spring.io/plugins-release/com/hadoop/gplcompression/hadoop-lzo/0.4.15-gplextras5.0.0/hadoop-lzo-0.4.15-gplextras5.0.0.jar
+
+    - name: "copy hadoop-lzo"
+      command: cp {{hadoop_tarball_dir}}/hadoop-lzo/hadoop-lzo-0.4.21-SNAPSHOT.jar {{hadoop_dir}}/share/hadoop/common/
+
+    - name: "copy hadoop-lzo native"
+      shell: cp {{hadoop_tarball_dir}}/hadoop-lzo/native/* {{hadoop_dir}}/lib/native
+
+    - name: "Create hadoop {{item}} directory."
+      file: path={{item}} state=directory owner=root group=root
+      tags: bootstrap
+      with_items:
+        - "{{data_dir}}"
+        - "{{dfs_dn_dir}}"
+        - "{{dfs_nn_dir}}"
+        - "{{log_dir}}"
+        - "{{qjournal_dir}}"
+        - "{{hadoop_conf_dir}}"
+        - "{{socket_dir}}"
+        - "{{yarn_app_log_dir}}"
+        - "{{yarn_data_local}}"
+        - "{{yarn_data_log}}"
+        - "{{log_dir}}/hadoop-hdfs"
+
+    - name: Config Hadoop
+      template: src={{ item }} dest="{{hadoop_dir}}/conf/{{ item }}" owner=root group=root mode=0644
+      with_items:
+        - core-site.xml
+        - hadoop-env.sh
+        - hadoop-metrics2.properties
+        - hdfs-site.xml
+        - org-xerial-snappy.properties
+        - slaves
+        - mapred-site.xml
+        - yarn-site.xml
+        - fair-scheduler.xml
+        - dfs.hosts.exclude
+        - httpfs-site.xml
+        - httpfs-env.sh
+        - httpfs-signature.secret
+
+- hosts: journalnodes[0]
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}}
+  tasks:
+    #- name: start journalnode
+    #  command: "{{ hadoop_dir }}/sbin/hadoop-daemons.sh start journalnode"
+
+- hosts: namenodes[0]
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}}
+  tasks:
+    #- name: "format zkfc"
+    #  command: "{{ hadoop_dir}}/bin/hdfs zkfc -formatZK -force"
+
+    #- name: "format namenode"
+    #  command: "{{ hadoop_dir }}/bin/hdfs namenode -format -force"
+
+    #- name: "start namenode"
+    #  command: "{{ hadoop_dir }}/sbin/hadoop-daemon.sh start namenode"
+
+    #- name: "start httpfs"
+    #  command: "HTTPFS_CONFIG="{{hadoop_dir}}/conf" {{ hadoop_dir }}/sbin/httpfs.sh start"
+
+- hosts: namenodes[1]
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}}
+  tasks:
+    #- name: sync data to standby namenode
+    #  command: "{{hadoop_dir}}/bin/hdfs namenode -bootstrapStandby"
+
+    #- name: start standby namenode
+    #  command: "{{hadoop_dir}}/sbin/hadoop-daemon.sh start namenode"
+
+- hosts: namenodes
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}}
+  tasks:
+    #- name: "start zkfc"
+    #  command: "{{hadoop_dir}}/sbin/hadoop-daemon.sh --script {{hadoop_dir}}/bin/hdfs start zkfc"
+
+- hosts: datanodes
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}}
+  tasks:
+    #- name: start datanode
+    #  command: "{{hadoop_dir}}/sbin/hadoop-daemons.sh start datanode"
+
+- hosts: resourcemanager
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}}
+  tasks:
+    #- name: start yarn
+    #  command: "{{hadoop_dir}}/sbin/start-yarn.sh"
+

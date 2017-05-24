@@ -1,0 +1,56 @@
+---
+
+- hosts: hue
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hue_version: 3.12.0
+    hue_dir: /root/hue-{{hue_version}}
+    hue_tarball_dir: /home/ubuntu/share
+    hue_tmp_dir: /home/ubuntu/share/hue-{{hue_version}}
+    hue_log_dir: /data/hue/log
+    hue_meta_database: hue_meta
+  tasks:
+    - name: "Ensure the hue tmp dir exists at {{hue_tmp_dir}}"
+      file: path={{hue_tmp_dir}} state=directory
+
+    - name: "Ensure the hue dir exists at {{hue_dir}}"
+      file: path={{hue_dir}} state=directory
+    
+    - name: "Ensure the hue log dir exists at {{hue_log_dir}}"
+      file: path={{hue_log_dir}} state=directory
+
+    - name: install pip
+      shell: pip install cloudpickle requests flake8 flaky pytest
+
+    #- name: get hue source code
+    #  command: creates={{ hue_tarball_dir }}/hue-{{hue_version}}.tgz chdir={{ hue_tarball_dir }} curl -O https://dl.dropboxusercontent.com/u/730827/hue/releases/{{hue_version}}/hue-{{hue_version}}.tgz
+    
+    #- name: Unpack tarball.
+    #  command: tar zxf {{hue_tarball_dir}}/hue-{{hue_version}}.tgz --strip-components=1 chdir={{hue_tmp_dir}}
+
+    #- name: install hue
+    #  shell: PREFIX={{hue_dir}} make install chdir={{hue_tmp_dir}}
+
+    #- name: delete {{hue_tmp_dir}}
+    #  command: rm -rf {{hue_tmp_dir}}
+
+    #- name: config hue
+    #  template: src={{ item }} dest="{{hue_dir}}/hue/desktop/conf/{{ item }}" owner=root group=root mode=0644
+    #  with_items:
+    #    - hue.ini
+    #    - log.conf
+
+    #- name: initdb
+    #  command: mysql -uhive -phive -hnode1 -e"CREATE DATABASE if not exists {{hue_meta_database}} DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;"
+
+    #- name: syncdb
+    #  shell: "{{hue_dir}}/hue/build/env/bin/hue syncdb"
+    
+    #- name: migratedb
+    #  shell: "{{hue_dir}}/hue/build/env/bin/hue migrate"
+
+    #- name: start up
+    #  shell: nohup {{hue_dir}}/hue/build/env/bin/hue runserver 0.0.0.0:8888 &
