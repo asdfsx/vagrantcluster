@@ -10,7 +10,7 @@
     remote_user_passwd: root
   tasks:
     - name: install mariadb
-      command: apt-get -y install mariadb-server
+      command: yum install -y mariadb-server
 
     - name: config mariadb
       command: sed -i "s/127.0.0.1/0.0.0.0/g" /etc/mysql/mariadb.conf.d/50-server.cnf
@@ -32,4 +32,4 @@
   vars:
   tasks:
     - name: install mariadb client
-      command: apt-get -y install mariadb-client
+      command: yum install -y mariadb-client
