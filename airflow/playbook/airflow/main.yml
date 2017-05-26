@@ -1,0 +1,51 @@
+---
+
+- hosts: airflow
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    dbuser: root
+    dbpasswd: root
+    airflow_dir: /root/airflow
+    rabbit_user: airflow
+    rabbit_user_passwd: airflow
+    rabbit_vhost: airflow
+  tasks:
+    - name: install openssl
+      command: apt-get install -y libssl-dev
+
+    - name: install airflow
+      command: pip install airflow[async,devel,celery,crypto,mysql,password,rabbitmq,redis]
+
+    - name: uninstall librabbitmq
+      command: pip uninstall -y librabbitmq
+
+    - name: install amqp
+      command: pip install amqp
+
+    - name: "Ensure the airflow dir exists at {{ airflow_dir }}"
+      file: path={{ airflow_dir }} state=directory
+
+    - name: add airflow config file
+      template: src={{ item }} dest="{{ airflow_dir }}/{{ item }}" owner=root group=root mode=0644
+      with_items:
+        - airflow.cfg
+        - unittests.cfg
+
+- hosts: worker
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    airflow_dir: /root/airflow
+  tasks:
+    - name: deploy start_worker.sh
+      template: src={{ item }} dest="{{ airflow_dir }}/{{ item }}" owner=root group=root mode=0644
+      with_items:
+        - start_worker.sh
+
+    #- name: start worker
+    #  shell: nohup sh {{ airflow_dir }}/start_worker.sh &

@@ -1,0 +1,45 @@
+---
+
+- hosts: mysql
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    remote_user: root
+    remote_user_passwd: root
+  tasks:
+    - name: install mariadb
+      command: apt-get -y install mariadb-server
+
+    - name: config mariadb
+      command: sed -i "s/127.0.0.1/0.0.0.0/g" /etc/mysql/mariadb.conf.d/50-server.cnf
+    
+    - name: config mariadb
+      template: src={{ item }} dest="/etc/mysql/mariadb.conf.d/70-{{ item }}" owner=root group=root mode=0644
+      with_items:
+        - mysqld.cnf
+
+    - name: restart mysql
+      command: systemctl restart mysql
+
+    #- name: create remote user
+    #  command: mysql -e "CREATE USER '{{remote_user}}'@'%' IDENTIFIED BY '{{remote_user_passwd}}';"
+
+    #- name: grant privillage
+    #  command: mysql -e "GRANT all ON *.* TO '{{remote_user}}'@'%' IDENTIFIED by '{{remote_user_passwd}}';"
+    - name: create database airflow
+      command: mysql -e "create database airflow"
+
+- hosts: all
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+  tasks:
+    - name: install mariadb client
+      command: apt-get -y install mariadb-client
+
+    - name: install mysql_config
+      command: apt-get -y install libmysqlclient-dev

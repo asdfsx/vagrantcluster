@@ -1,0 +1,29 @@
+---
+
+- hosts: redis 
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    remote_user: root
+    remote_user_passwd: root
+  tasks:
+    - name: install redis server
+      command: apt-get -y install redis-server
+
+    - name: config redis
+      command: sed -i "s/127.0.0.1/0.0.0.0/g" /etc/redis/redis.conf
+
+    - name: restart redis
+      command: systemctl restart redis.service
+
+- hosts: all
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+  tasks:
+    - name: install redis tools
+      command: apt-get -y install redis-tools

@@ -1,0 +1,10 @@
+[mysqld]
+innodb_buffer_pool_size  = 702545920 
+innodb_file_format       = Barracuda 
+innodb_file_format_check = ON 
+innodb_file_format_max   = Barracuda 
+innodb_file_per_table    = ON 
+innodb_large_prefix      = ON 
+innodb_log_file_size     = 50331648
+character-set-server     = latin1
+collation-server         = latin1_swedish_ci

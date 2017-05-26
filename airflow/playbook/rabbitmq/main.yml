@@ -1,0 +1,52 @@
+---
+
+- hosts: rabbitmq
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    rabbit_admin: root
+    rabbit_admin_passwd: root
+    rabbit_user: airflow
+    rabbit_user_passwd: airflow
+    rabbit_user_tag: airflow
+    rabbit_vhost: airflow
+  tasks:
+    - name: install rabbitmq
+      command: apt-get -y install rabbitmq-server
+
+    - name: enable rabbitmq_management
+      command: rabbitmq-plugins enable rabbitmq_management
+
+    - name: add admin user
+      command: rabbitmqctl add_user {{ rabbit_admin }} {{ rabbit_admin_passwd }}
+
+    - name: set admin tag
+      command: rabbitmqctl set_user_tags {{ rabbit_admin }} administrator  
+
+    - name: set admin permissions
+      command: rabbitmqctl set_permissions -p / {{ rabbit_admin }} ".*" ".*" ".*" 
+
+    - name: add user to rabbitmq
+      command: rabbitmqctl add_user {{ rabbit_user }} {{ rabbit_user_passwd }}
+
+    - name: add vhost to rabbitmq
+      command: rabbitmqctl add_vhost {{ rabbit_vhost }}
+
+    - name: set user tag 
+      command: rabbitmqctl set_user_tags {{ rabbit_user }} {{ rabbit_user_tag }}
+
+    - name: set user permissions
+      command: rabbitmqctl set_permissions -p {{ rabbit_vhost }} {{ rabbit_user }} ".*" ".*" ".*"
+
+- hosts: all
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+  tasks:
+    - name: install amqp-tools
+      command: apt-get -y install amqp-tools
+

@@ -1,0 +1,64 @@
+---
+
+- hosts: all
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+  tasks:
+    - name: "Ensure /etc/hosts dont have 127.0.0.1 node1 config"
+      command: sed -i '/^127.0.0.1.*node/d' /etc/hosts
+
+    - name: Create ssh key 
+      shell: echo y | ssh-keygen -t rsa -N '' -f /root/.ssh/id_rsa
+
+    - name: Collect ssh keys
+      shell: cat ~/.ssh/id_rsa.pub
+      register: ssh_keys
+
+    - name: check keys
+      debug: msg="{{ ssh_keys.stdout }}"
+
+    - name: clean authorized_key
+      shell: echo "" > ~/.ssh/authorized_keys
+
+    - name: deploy keys on all servers
+      authorized_key: 
+        user: root 
+        key: "{{ item[0] }}"
+      delegate_to: "{{ item[1] }}"
+      with_nested:
+        - "{{ ssh_keys.stdout }}"
+        - "{{ groups['airflow'] }}"
+
+    - name: For each host, scan for its ssh public key
+      command: "ssh-keyscan -t rsa {{ item }}"
+      register: hosts
+      with_items: "{{ groups['airflow'] }}"
+
+    - name: check hosts
+      debug: msg="{{ hosts.results }}"
+
+    - name: deploy hosts on all servers
+      known_hosts:
+        name: "{{ item.item }}"
+        key: "{{ item.stdout }}"
+        path: "/root/.ssh/known_hosts"
+      with_items: '{{ hosts.results }}'
+
+    - name: For each host, scan for its ssh public key, use ipaddress instead of hostname
+      command: "ssh-keyscan -t rsa {{ hostvars[item].ansible_enp0s8.ipv4.address }}"
+      register: hosts
+      with_items: "{{ groups['airflow'] }}"
+
+    - name: check hosts
+      debug: msg="{{ hosts.results }}"
+
+    - name: deploy hosts on all servers
+      known_hosts:
+        name: "{{ hostvars[item.item].ansible_enp0s8.ipv4.address }}"
+        key: "{{ item.stdout }}"
+        path: "/root/.ssh/known_hosts"
+      with_items: '{{ hosts.results }}'
+
