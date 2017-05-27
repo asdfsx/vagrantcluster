@@ -17,7 +17,7 @@
       command: apt-get install -y libssl-dev
 
     - name: install airflow
-      command: pip install airflow[async,devel,celery,crypto,mysql,password,rabbitmq,redis]
+      command: pip install airflow[postgres,async,devel,celery,crypto,mysql,password,rabbitmq,redis]
 
     - name: uninstall librabbitmq
       command: pip uninstall -y librabbitmq

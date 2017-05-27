@@ -1,0 +1,45 @@
+---
+
+- hosts: postgresql
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    remote_user: root
+    remote_user_passwd: root
+  tasks:
+    - name: install postgresql
+      command: apt-get -y install postgresql-9.5
+
+    - name: config postgres postgresql.conf
+      command: sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/g" /etc/postgresql/9.5/main/postgresql.conf
+
+    - name: config postgres pg_hba.conf
+      shell: echo "host    all             all             0.0.0.0/0               trust" >> /etc/postgresql/9.5/main/pg_hba.conf
+    
+    - name: restart postgresql
+      command: systemctl restart postgresql
+
+    - name: create remote user
+      command: createuser {{remote_user}} --superuser
+      become: true
+      become_user: postgres
+
+    - name: create database for remote user
+      command: createdb -O {{remote_user}} {{remote_user}}
+      become: true
+      become_user: postgres
+
+- hosts: all
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+  tasks:
+    - name: install mariadb client
+      command: apt-get -y install postgresql-client-9.5
+
+    - name: install mysql_config
+      command: pip install -y psycopg2

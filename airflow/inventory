@@ -6,6 +6,9 @@ node3     ansible_connection=ssh        ansible_ssh_user=ubuntu
 [mysql]
 node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
 
+[postgres]
+node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
 [redis]
 node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
 
