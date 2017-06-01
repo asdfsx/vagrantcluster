@@ -21,7 +21,7 @@ ansible-plabook -i inventory playbook/postgresql/main.yml
 ansible-plabook -i inventory playbook/rabbitmq/main.yml
 ```
 
-安装 redis
+安装 redis
 ```
 ansible-plabook -i inventory playbook/redis/main.yml
 ```
@@ -105,7 +105,7 @@ ansible-plabook -i inventory playbook/luigi/main.yml
   $ luigi --module examples.foo examples.Foo --workers 2
   ```
 说明：
-* 在工作端上要设置 `PYTHONPATH`，所有要执行的任务要存放 `PYTHONBPATH` 下。
+* 在工作端上要设置 `PYTHONPATH`，所有要执行的任务要存放 `PYTHONBPATH` 下。
 
 ### dkron
 
