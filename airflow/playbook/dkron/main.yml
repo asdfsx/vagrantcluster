@@ -1,0 +1,30 @@
+---
+
+- hosts: dkron
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    remote_user: root
+    remote_user_passwd: root
+    dkron_dir: /root/dkron
+    dkron_conf_dir: /root/dkron/config
+    dkrons: "{{ groups['dkron'] }}"
+  tasks:
+    - name: "Ensure the dkron dir exists at {{ dkron_dir }}"
+      file: path={{ dkron_dir }} state=directory
+
+    - name: "Ensure the dkron conf dir exists at {{ dkron_conf_dir }}"
+      file: path={{ dkron_conf_dir }} state=directory
+
+    - name: download dkron
+      command: creates={{ dkron_dir }}/dkron_0.9.3_linux_amd64.tar.gz chdir={{ dkron_dir }} curl -o dkron_0.9.3_linux_amd64.tar.gz https://github-production-release-asset-2e65be.s3.amazonaws.com/37184230/49f79daa-0902-11e7-9ae1-f9fd5b8341d3?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20170601%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20170601T045941Z&X-Amz-Expires=300&X-Amz-Signature=e955a32ecb997e436c56f40621c9e6e50901d3854d5f23ff166776d0cb5cf138&X-Amz-SignedHeaders=host&actor_id=2292716&response-content-disposition=attachment%3B%20filename%3Ddkron_0.9.3_linux_amd64.tar.gz&response-content-type=application%2Foctet-stream
+
+    - name: Unpack tarball.
+      command: tar zxf {{ dkron_dir }}/dkron_0.9.3_linux_amd64.tar.gz --strip-components=1  chdir={{ dkron_dir }}
+
+    - name: config dkron
+      template: src={{ item }} dest="{{ dkron_conf_dir }}/{{ item }}" owner=root group=root mode=0644
+      with_items:
+        - dkron.json

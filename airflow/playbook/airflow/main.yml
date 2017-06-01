@@ -16,14 +16,14 @@
     - name: install openssl
       command: apt-get install -y libssl-dev
 
-    - name: install airflow
-      command: pip install airflow[postgres,async,devel,celery,crypto,mysql,password,rabbitmq,redis]
+    #- name: install airflow
+    #  command: pip install airflow[postgres,async,devel,celery,crypto,mysql,password,rabbitmq,redis,hive]==1.7.1.3
 
-    - name: uninstall librabbitmq
-      command: pip uninstall -y librabbitmq
+    #- name: uninstall librabbitmq
+    #  command: pip uninstall -y librabbitmq
 
-    - name: install amqp
-      command: pip install amqp
+    #- name: install amqp
+    #  command: pip install amqp
 
     - name: "Ensure the airflow dir exists at {{ airflow_dir }}"
       file: path={{ airflow_dir }} state=directory
@@ -33,6 +33,26 @@
       with_items:
         - airflow.cfg
         - unittests.cfg
+
+- hosts: master
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    airflow_dir: /root/airflow
+  tasks:
+    - name: initdb
+      command: airflow initdb
+
+    - name: start flower
+      command: airflow flower
+
+    - name: start webserver
+      command: airflow webserver --debug
+
+    - name: start scheduler
+      command: airflow scheduler
 
 - hosts: worker
   user: ubuntu

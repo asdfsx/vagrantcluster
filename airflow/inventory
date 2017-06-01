@@ -6,10 +6,13 @@ node3     ansible_connection=ssh        ansible_ssh_user=ubuntu
 [mysql]
 node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
 
-[postgres]
+[postgresql]
 node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
 
 [redis]
+node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[etcd]
 node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
 
 [rabbitmq]
@@ -19,5 +22,15 @@ node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
 node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
 
 [worker]
+node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node3     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[luigi]
+node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node3     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[dkron]
+node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
 node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
 node3     ansible_connection=ssh        ansible_ssh_user=ubuntu

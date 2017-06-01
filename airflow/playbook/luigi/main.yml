@@ -1,0 +1,41 @@
+---
+
+- hosts: luigi
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    dbuser: root
+    dbpasswd: root
+    luigi_dir: /root/luigi
+    rabbit_user: luigi
+    rabbit_user_passwd: luigi
+    rabbit_vhost: luigi
+  tasks:
+    - name: install luigi
+      command: pip install luigi
+
+    - name: "Ensure the luigi dir exists at {{ luigi_dir }}"
+      file: path={{ luigi_dir }} state=directory
+
+    - name: add luigi config file
+      template: src={{ item }} dest="{{ luigi_dir }}/{{ item }}" owner=root group=root mode=0644
+      with_items:
+        - luigi.cfg
+
+- hosts: luigischeduler
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    dbuser: root
+    dbpasswd: root
+    luigi_dir: /root/luigi
+    rabbit_user: luigi
+    rabbit_user_passwd: luigi
+    rabbit_vhost: luigi
+  tasks:
+    - name: start scheduler
+      command: LUIGI_CONFIG_PATH=/root/luigi/luigi.cfg luigid

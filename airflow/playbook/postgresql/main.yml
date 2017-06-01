@@ -31,6 +31,16 @@
       become: true
       become_user: postgres
 
+    - name: create database for airflow
+      command: createdb -O {{remote_user}} airflow
+      become: true
+      become_user: postgres
+
+    - name: create database for luigi
+      command: createdb -O {{remote_user}} luigi
+      become: true
+      become_user: postgres
+
 - hosts: all
   user: ubuntu
   become: yes
@@ -38,8 +48,8 @@
   become_user: root
   vars:
   tasks:
-    - name: install mariadb client
+    - name: install postgres client
       command: apt-get -y install postgresql-client-9.5
 
-    - name: install mysql_config
-      command: pip install -y psycopg2
+    - name: install postgres python driver
+      command: pip install psycopg2

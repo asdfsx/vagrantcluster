@@ -134,11 +134,3 @@ nohup bin/hive --service hiveserver2 &
 参考文章：  
 http://www.cnblogs.com/julyme/p/5196797.html  
 http://blog.csdn.net/dockj/article/details/53122054  
-
-
-# airflow
-airflow 是 airbnb 开源的一个调度系统。  
-支持DAG方式的任务，而任务的定义由 python 完成。  
-同时用 Celery 框架来实现任务的分布式调度。  
-任务的下发使用 rabbitmq、redis。（由 Celery 提供支持）  
-数据的持久化使用 mysql、postgres。（由 sqlalchemy 提供支持）  

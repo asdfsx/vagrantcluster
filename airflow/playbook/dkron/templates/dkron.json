@@ -1,0 +1,22 @@
+{
+  "node": "{{inventory_hostname}}",
+  "bind": "0.0.0.0:8946",
+  "backend": "etcd",
+  "backend_machine": "{{groups['etcd'][0]}}:2379",
+  "advertise_addr": "{{inventory_hostname}}",
+  "debug": true,
+  "tags": {
+    "role": "web",
+    "datacenter": "east"
+  },
+  "keyspace": "dkron",
+  "join": [
+    {% for index in range(dkrons|length) %}
+    {% if index == dkrons|length-1 %}
+    "{{ dkrons[index] }}"
+    {% else %}
+    "{{ dkrons[index] }}",
+    {% endif %}
+    {% endfor %}
+  ]
+}

@@ -62,3 +62,5 @@
         path: "/root/.ssh/known_hosts"
       with_items: '{{ hosts.results }}'
 
+    - name: install some build tools
+      command: apt-get install -y libffi-dev

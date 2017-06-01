@@ -1,0 +1,21 @@
+---
+
+- hosts: etcd
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    remote_user: root
+    remote_user_passwd: root
+  tasks:
+    - name: install etcd server
+      command: apt-get -y install etcd
+
+    - name: config etcd
+      template: src={{ item }} dest="/etc/default/{{ item }}" owner=root group=root mode=0644
+      with_items:
+        - etcd
+
+    - name: restart etcd
+      command: systemctl restart etcd.service
