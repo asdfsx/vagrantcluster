@@ -163,4 +163,27 @@ $ ./dkron agent -server
   curl -X DELETE http://node1:8080/v1/jobs/job_name?pretty=true
   ```
 
-### 
+### rundeck
+
+安装 rundeck
+```
+ansible-plabook -i inventory playbook/rundeck/main.yml
+```
+
+在 `ubuntu` 环境下，下载 `deb` 安装包，使用 `dpkg` 命令进行安装。
+
+配置文件在 `/etc/rundeck` 下。
+
+初始用户名密码 `admin/admin`。
+
+登录后，首先创建新的项目。
+
+添加项目所需的节点。 进入项目，点击`nodes` 按钮，尝试列出所有的节点。然后在服务器的 `/var/rundeck/projects/test/etc/` 目录下会生成 `resources.xml` 文件。
+修改文件，添加节点。
+
+添加节点的访问认证。默认的 `ssh` 证书存放目录为 `/var/lib/rundeck/.ssh`，创建该目录，并将所有的 `~/.ssh` 下所有的文件都复制进去。注意 `rundeckd` 默认使用 `rundeck` 用户启动，所以要执行
+```
+$ chown -R rundeck.rundeck /var/lib/rundeck/.ssh
+```
+
+尝试在 `command` 页面上远程调用命令。

@@ -34,3 +34,6 @@ node3     ansible_connection=ssh        ansible_ssh_user=ubuntu
 node1     ansible_connection=ssh        ansible_ssh_user=ubuntu
 node2     ansible_connection=ssh        ansible_ssh_user=ubuntu
 node3     ansible_connection=ssh        ansible_ssh_user=ubuntu
+
+[rundeck]
+node1     ansible_connection=ssh        ansible_ssh_user=ubuntu

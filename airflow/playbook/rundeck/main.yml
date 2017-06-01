@@ -1,0 +1,40 @@
+---
+
+- hosts: rundeck
+  user: ubuntu
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    remote_user: root
+    remote_user_passwd: root
+    rundeck_dir: /root/rundeck
+    rundeck_conf_dir: /etc/rundeck/
+  tasks:
+    - name: install jdk
+      command: apt-get install -y openjdk-8-jdk
+
+    - name: "Ensure the rundeck dir exists at {{ rundeck_dir }}"
+      file: path={{ rundeck_dir }} state=directory
+
+    - name: download rundeck
+      #command: creates={{ rundeck_dir }}/rundeck-launcher-2.8.2.jar chdir={{ rundeck_dir }} curl -o rundeck-launcher-2.8.2.jar http://akamai.bintray.com/5a/5a7c6ede09ef5ab21af298bbec7b0c0e51c4931046f24a7ee83b9442c414108f?__gda__=exp=1496298633~hmac=0745cddc2437255e796a756db039895d3b582ab9d4b94e2663d0d9e9ed7c3610&response-content-disposition=attachment%3Bfilename%3D%22rundeck-launcher-2.8.2.jar%22&response-content-type=application%2Fjava-archive&requestInfo=U2FsdGVkX1_SGRq51KVPn1hRY8bXUUPotyy-zhkE5yUnvT3Zlgr6WTqnz0zQmT3UsdmARZLdgZI56sARtIr18WkC9MOj18EqEMNq5IB8UMM_R8kyiG0qDqnm9nxw24iWVDFVtS5UYs5Lf_0JvoWVWLWMVTw2932VAKwUi3KTDjY
+      command: creates={{ rundeck_dir }}/rundeck-2.8.2-1-GA.deb chdir={{ rundeck_dir }} curl -o rundeck-2.8.2-1-GA.deb http://akamai.bintray.com/73/739ee8230a5da973c95a540391d021bc48f2cf77a17f68b7310ca4ff7aac9b17?__gda__=exp=1496299345~hmac=886b4e571760e0ea9ccf81cd75babdb8fa82900b02f932e98bf9c3103f2a3187&response-content-disposition=attachment%3Bfilename%3D%22rundeck-2.8.2-1-GA.deb%22&response-content-type=application%2Fjson&requestInfo=U2FsdGVkX18vfIr1wK4sBe_jdJgAeHMZyS-BtR-LChMuz1vkn1LrfgfTySbzgZd7mjqyJ70igrVUE6LWg_D6cjcj43auuDNoLm_cNGUy6TKvpvven-1rVHjBPi8bqnOlW4Qdbb61gVYHvtJgvI5thFjHDqBCuIfkEd58n3an-no
+
+    - name: install from deb
+      command: chdir={{ rundeck_dir }} dpkg -i rundeck-2.8.2-1-GA.deb
+
+    #- name: create database on postgresql
+    #  command: createdb -O {{remote_user}} rundeck
+    #  become: true
+    #  become_user: postgres
+
+    - name: config rundeck
+      template: src={{ item }} dest="{{ rundeck_conf_dir }}/{{ item }}" owner=root group=root mode=0644
+      with_items:
+        - rundeck-config.properties
+
+    - name: start rundeck
+      command: systemctl start rundeckd
+
+    
