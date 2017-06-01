@@ -1,0 +1,55 @@
+---
+
+- hosts: hadoop
+  user: vagrant
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}} 
+    hadoop_conf_dir: "{{hadoop_dir}}/conf"
+    hadoop_hosts:
+      - host: "{{groups['hadoop']}}"
+        id: 1
+    hbase_version: 1.2.5
+    hbase_dir: /root/hbase-{{hadoop_version}}
+    hbase_tarball_dir: /home/vagrant/share
+    hbase_conf_dir: "{{hbase_dir}}/conf"
+    hbase_meta_database: hbase_meta
+    hbase_meta_user: hbase
+    hbase_meta_passwd: hbase
+    hbase_log_dir: /data/hbase/log
+    hbase_local_scratchdir_dir: /data/hbase/scratchdir
+    hbase_download_resource_dir: /data/hbase/resource
+    hbase_operation_log: "{{hbase_log_dir}}/operation_logs"
+    hbase_query_log: "{{hbase_log_dir}}/query_logs"
+
+  tasks:
+    - name: "Ensure the tarball dir exists at {{hbase_tarball_dir}}"
+      file: path={{hbase_tarball_dir}} state=directory
+
+    - name: "Ensure the hbase dir exists at {{hbase_dir}}"
+      file: path={{hbase_dir}} state=directory  
+
+    - name: "Ensure the hbase dir exists at {{hbase_log_dir}}"
+      file: path={{hbase_log_dir}} state=directory
+
+    - name: "Ensure the hbase dir exists at {{hbase_local_scratchdir_dir}}"
+      file: path={{hbase_local_scratchdir_dir}} state=directory
+
+    - name: "Ensure the hbase dir exists at {{hbase_download_resource_dir}}"
+      file: path={{hbase_download_resource_dir}} state=directory
+
+    - name: "Ensure the hbase dir exists at {{hbase_operation_log}}"
+      file: path={{hbase_operation_log}} state=directory
+
+    - name: "Ensure the hbase dir exists at {{hbase_query_log}}"
+      file: path={{hbase_query_log}} state=directory
+
+    - name: determine interface
+      set_fact: ipv4_address="{{ hostvars[inventory_hostname].ansible_enp0s8.ipv4.address }}"
+
+    - name: Unpack tarball.
+      command: tar zxf {{hbase_tarball_dir}}/hbase-{{hbase_version}}-bin.tar.gz --strip-components=1 chdir={{hbase_dir}} creates={{hbase_dir}}/bin
+

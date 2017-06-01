@@ -1,7 +1,7 @@
 ---
 
 - hosts: zookeepers
-  user: ubuntu
+  user: vagrant
   become: yes
   become_method : sudo
   become_user: root
@@ -19,7 +19,7 @@
     zookeeper_version: 3.4.10
     zookeeper_dir: /root/zookeeper-{{zookeeper_version}} 
     zookeeper_conf_dir: "{{zookeeper_dir}}"
-    zookeeper_tarball_dir: /home/ubuntu/share
+    zookeeper_tarball_dir: /home/vagrant/share
     zookeeper_force_myid: yes
     zookeeper_hosts: "{{groups['zookeepers']}}"
   tasks:

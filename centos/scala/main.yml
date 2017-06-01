@@ -1,0 +1,26 @@
+---
+
+- hosts: all
+  user: vagrant
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    remote_user: root
+    remote_user_passwd: root
+    scala_version: 2.11.11
+    scala_dir: /root/scala-{{scala_version}}
+    scala_tarball_dir: /home/vagrant/share
+  tasks:
+    - name: "Ensure the tarball dir exists at {{scala_tarball_dir}}"
+      file: path={{scala_tarball_dir}} state=directory
+
+    - name: "Ensure the scala dir exists at {{scala_dir}}"
+      file: path={{scala_dir}} state=directory
+
+    - name: determine interface
+      set_fact: ipv4_address="{{ hostvars[inventory_hostname].ansible_enp0s8.ipv4.address }}"
+
+    - name: Unpack tarball.
+      command: tar zxf {{scala_tarball_dir}}/scala-{{scala_version}}.tgz --strip-components=1 chdir={{scala_dir}} creates={{scala_dir}}/bin
+

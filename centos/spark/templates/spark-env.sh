@@ -65,8 +65,8 @@
 # - SPARK_NICENESS      The scheduling priority for daemons. (Default: 0)
 # - SPARK_NO_DAEMONIZE  Run the proposed command in the foreground. It will not output a PID file.
 
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre
-export SCALA_HOME=/usr/share/scala-2.11
+export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.131-3.b12.el7_3.x86_64
+export SCALA_HOME=/root/scala-2.11.11
 export HADOOP_HOME={{hadoop_dir}}
 export SPARK_LOG_DIR={{spark_log_dir}}
 export SPARK_HOME={{spark_dir}}

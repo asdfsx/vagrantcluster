@@ -1,14 +1,14 @@
 ---
 
 - hosts: livy
-  user: ubuntu
+  user: vagrant
   become: yes
   become_method : sudo
   become_user: root
   vars:
     livy_version: 0.3.0
     livy_dir: /root/livy-{{livy_version}}
-    livy_tarball_dir: /home/ubuntu/share
+    livy_tarball_dir: /home/vagrant/share
     livy_log_dir: /data/livy/log
 
     spark_version: 2.1.0

@@ -1,7 +1,7 @@
 ---
 
 - hosts: spark
-  user: ubuntu
+  user: vagrant
   become: yes
   become_method : sudo
   become_user: root
@@ -14,7 +14,7 @@
         id: 1
     spark_version: 2.1.0
     spark_dir: /root/spark-{{spark_version}}
-    spark_tarball_dir: /home/ubuntu/share
+    spark_tarball_dir: /home/vagrant/share
     spark_log_dir: /data/spark/log
   tasks:
     - name: "Ensure the tarball dir exists at {{hadoop_tarball_dir}}"

@@ -1,7 +1,7 @@
 ---
 
 - hosts: hadoop
-  user: ubuntu
+  user: vagrant
   become: yes
   become_method : sudo
   become_user: root
@@ -21,7 +21,7 @@
     hadoop_version: 2.7.3
     hadoop_dir: /root/hadoop-{{hadoop_version}} 
     hadoop_conf_dir: "{{hadoop_dir}}/conf"
-    hadoop_tarball_dir: /home/ubuntu/share
+    hadoop_tarball_dir: /home/vagrant/share
     hadoop_hosts:
       - host: "{{groups['hadoop']}}"
         id: 1
@@ -38,9 +38,6 @@
     - name: Unpack tarball.
       command: tar zxf {{hadoop_tarball_dir}}/hadoop-{{hadoop_version}}.tar.gz --strip-components=1 chdir={{hadoop_dir}} creates={{hadoop_dir}}/bin
       tags: bootstrap
-
-    #- name: "download hadoop-lzo"
-    #  command: creates={{ hadoop_dir }}/share/hadoop/common/lib/hadoop-lzo-0.4.15-gplextras5.0.0.jar chdir={{ hadoop_dir }}/share/hadoop/common/lib/ curl -O http://repo.spring.io/plugins-release/com/hadoop/gplcompression/hadoop-lzo/0.4.15-gplextras5.0.0/hadoop-lzo-0.4.15-gplextras5.0.0.jar
 
     - name: "copy hadoop-lzo"
       command: cp {{hadoop_tarball_dir}}/hadoop-lzo/hadoop-lzo-0.4.21-SNAPSHOT.jar {{hadoop_dir}}/share/hadoop/common/
@@ -82,7 +79,7 @@
         - httpfs-signature.secret
 
 - hosts: journalnodes[0]
-  user: ubuntu
+  user: vagrant
   become: yes
   become_method : sudo
   become_user: root
@@ -94,7 +91,7 @@
     #  command: "{{ hadoop_dir }}/sbin/hadoop-daemons.sh start journalnode"
 
 - hosts: namenodes[0]
-  user: ubuntu
+  user: vagrant
   become: yes
   become_method : sudo
   become_user: root
@@ -115,7 +112,7 @@
     #  command: "HTTPFS_CONFIG="{{hadoop_dir}}/conf" {{ hadoop_dir }}/sbin/httpfs.sh start"
 
 - hosts: namenodes[1]
-  user: ubuntu
+  user: vagrant
   become: yes
   become_method : sudo
   become_user: root
@@ -130,7 +127,7 @@
     #  command: "{{hadoop_dir}}/sbin/hadoop-daemon.sh start namenode"
 
 - hosts: namenodes
-  user: ubuntu
+  user: vagrant
   become: yes
   become_method : sudo
   become_user: root
@@ -139,10 +136,10 @@
     hadoop_dir: /root/hadoop-{{hadoop_version}}
   tasks:
     #- name: "start zkfc"
-    #  command: "{{hadoop_dir}}/sbin/hadoop-daemon.sh --script {{hadoop_dir}}/bin/hdfs start zkfc"
+    #  command: "{{hadoop_dir}}/sbin/hadoop-daemon.sh start zkfc"
 
 - hosts: datanodes
-  user: ubuntu
+  user: vagrant
   become: yes
   become_method : sudo
   become_user: root
@@ -154,7 +151,7 @@
     #  command: "{{hadoop_dir}}/sbin/hadoop-daemons.sh start datanode"
 
 - hosts: resourcemanager
-  user: ubuntu
+  user: vagrant
   become: yes
   become_method : sudo
   become_user: root

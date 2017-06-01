@@ -6,22 +6,20 @@
 # backwards compatibility). Please don't change it unless you know what
 # you're doing.
 Vagrant.configure("2") do |config|
-  (1..3).each do |i|
-    config.vm.define "centos#{i}" do |centos|
-      centos.vm.box = "centos-7.3"
-      centos.vm.hostname="centos#{i}"
-      centos.vm.network "private_network", ip: "192.168.59.1#{i}"
-      centos.vm.synced_folder "./share", "/home/vagrant/share"
-      centos.vm.provider "virtualbox" do |v|
-        v.name = "centos#{i}"
-        v.memory = 2048
+  (1..4).each do |i|
+    config.vm.define "node#{i}" do |node|
+      node.vm.box = "centos-7.3"
+      node.vm.hostname="node#{i}"
+      node.vm.network "private_network", ip: "192.168.59.1#{i}"
+      node.vm.synced_folder "../share", "/home/vagrant/share"
+      node.vm.provider "virtualbox" do |v|
+        v.name = "node#{i}"
+        v.memory = 3072
         v.cpus = 1
       end
-      centos.vm.provision "shell", inline: <<-SHELL
+      node.vm.provision "shell", inline: <<-SHELL
         sudo su -c "cat /home/vagrant/share/hosts >> /etc/hosts"
-        sudo su -c "mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup"
-        sudo su -c "wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo"
-        sudo su -c "yum makecache"
+        sudo su -c "cat /home/vagrant/share/authorized_keys >> /home/vagrant/.ssh/authorized_keys"
       SHELL
     end
   end

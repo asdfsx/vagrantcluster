@@ -5348,4 +5348,12 @@
     <value>hive.added.files.path,hive.added.jars.path,hive.added.archives.path</value>
     <description>Comma separated list of variables which are used internally and should not be configurable.</description>
   </property>
+  <property>
+    <name>hive.server2.webui.host</name>
+    <value>{{groups['hive'][0]}}</value>
+  </property>
+  <property>
+    <name>hive.server2.webui.port</name>
+    <value>10002</value>
+  </property>
 </configuration>

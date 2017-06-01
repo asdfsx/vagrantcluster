@@ -1,7 +1,7 @@
 ---
 
 - hosts: mysql
-  user: ubuntu
+  user: vagrant
   become: yes
   become_method : sudo
   become_user: root
@@ -12,11 +12,8 @@
     - name: install mariadb
       command: yum install -y mariadb-server
 
-    - name: config mariadb
-      command: sed -i "s/127.0.0.1/0.0.0.0/g" /etc/mysql/mariadb.conf.d/50-server.cnf
-
     - name: restart mysql
-      command: systemctl restart mysql
+      command: systemctl restart mariadb
 
     - name: create remote user
       command: mysql -e "CREATE USER '{{remote_user}}'@'%' IDENTIFIED BY '{{remote_user_passwd}}';"
@@ -25,11 +22,11 @@
       command: mysql -e "GRANT all ON *.* TO '{{remote_user}}'@'%' IDENTIFIED by '{{remote_user_passwd}}';"
 
 - hosts: all
-  user: ubuntu
+  user: vagrant
   become: yes
   become_method : sudo
   become_user: root
   vars:
   tasks:
     - name: install mariadb client
-      command: yum install -y mariadb-client
+      command: yum install -y mariadb-server

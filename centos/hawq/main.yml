@@ -1,0 +1,135 @@
+---
+
+- hosts: hawq
+  user: vagrant
+  become: yes
+  become_method : sudo
+  become_user: root
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}} 
+    hadoop_conf_dir: "{{hadoop_dir}}/conf"
+    hadoop_hosts:
+      - host: "{{groups['hadoop']}}"
+        id: 1
+    hawq_version: 2.1.0.0
+    hawq_dir: /opt/hawq-{{hawq_version}}
+    hawq_tar_ball: /home/vagrant/share
+    hawq_tmp_dir: /home/vagrant/share/apache-hawq-src-2.1.0.0-incubating
+  tasks:
+    #- name: config hawq server
+    #  template: src={{ item }} dest="/etc/{{ item }}" owner=root group=root mode=0644
+    #  with_items:
+    #    - sysctl.conf
+
+    #- name: config hawq server limits
+    #  template: src={{ item }} dest="/etc/security/{{ item }}" owner=root group=root mode=0644
+    #  with_items:
+    #    - limits.conf
+
+    #- name: add user hawq
+    #  command: useradd -d "/home/hawq" -m -s "/bin/bash" hawq
+    #- name: add group passwd
+    #  command: groupadd gpadmin
+
+    #- name: add user pgadmin
+    #  command: useradd -g "gpadmin" -d "/home/gpadmin" -m -s "/bin/bash" gpadmin
+
+    #- name: "Ensure the tarball dir exists at {{hawq_tarball_dir}}"
+    #  file: path={{hawq_tarball_dir}} state=directory
+
+    #- name: "Ensure the hawq dir exists at {{hawq_dir}}"
+    #  file: path={{hawq_dir}} state=directory
+
+    #- name: determine interface
+    #  set_fact: ipv4_address="{{ hostvars[inventory_hostname].ansible_enp0s8.ipv4.address }}"
+
+    #- name: Unpack tarball.
+    #  command: tar zxf {{hawq_tarball_dir}}/apache-hawq-src-{{hawq_version}}-incubating.tar.gz --strip-components=1 chdir={{hawq_tmp_dir}} creates={{hawq_tmp_dir}}
+    #  tags: bootstrap
+
+    #- name: configure
+    #  command: ./configre --prefix={{hawq_dir}} chdir={{hawq_tmp_dir}} --with-python --with-perl chdir={{hawq_tmp_dir}}
+
+    #- name: make
+    #  command: make chdir={{hawq_tmp_dir}}
+
+    #- name: make install
+    #  command: make install chdir={{hawq_tmp_dir}}
+
+    #- name: chown /opt/hawq
+    #  command: chown -R gpadmin.gpadmin /opt/hawq-{{hawq_version}}
+
+- hosts: hawq
+  user: vagrant
+  become: yes
+  become_method : sudo
+  become_user: gpadmin
+  vars:
+    hadoop_version: 2.7.3
+    hadoop_dir: /root/hadoop-{{hadoop_version}}
+    hadoop_conf_dir: "{{hadoop_dir}}/conf"
+    hadoop_hosts:
+      - host: "{{groups['hadoop']}}"
+        id: 1
+  tasks:
+    - name: Create ssh key 
+      shell: echo y | ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa
+
+    - name: Collect ssh keys
+      shell: cat ~/.ssh/id_rsa.pub
+      register: ssh_keys
+
+    - name: check keys
+      debug: msg="{{ ssh_keys.stdout }}"
+
+    - name: clean authorized_key
+      shell: echo "" > ~/.ssh/authorized_keys
+
+    - name: deploy keys on all servers
+      authorized_key: 
+        user:  gpadmin
+        key: "{{ item[0] }}"
+      delegate_to: "{{ item[1] }}"
+      with_nested:
+        - "{{ ssh_keys.stdout }}"
+        - "{{ groups['hawq'] }}"
+
+    - name: For each host, scan for its ssh public key
+      command: "ssh-keyscan -t rsa {{ item }}"
+      register: hosts
+      with_items: "{{ groups['hawq'] }}"
+
+    - name: check hosts
+      debug: msg="{{ hosts.results }}"
+
+    - name: deploy hosts on all servers
+      known_hosts:
+        name: "{{ item.item }}"
+        key: "{{ item.stdout }}"
+        path: "~/.ssh/known_hosts"
+      with_items: '{{ hosts.results }}'
+
+    - name: For each host, scan for its ssh public key, use ipaddress instead of hostname
+      command: "ssh-keyscan -t rsa {{ hostvars[item].ansible_enp0s8.ipv4.address }}"
+      register: hosts
+      with_items: "{{ groups['hawq'] }}"
+
+    - name: check hosts
+      debug: msg="{{ hosts.results }}"
+
+    - name: deploy hosts on all servers
+      known_hosts:
+        name: "{{ hostvars[item.item].ansible_enp0s8.ipv4.address }}"
+        key: "{{ item.stdout }}"
+        path: "~/.ssh/known_hosts"
+      with_items: '{{ hosts.results }}'
+
+
+    - name: add config files
+      template: src={{ item }} dest="/opt/hawq-2.1.0.0/etc/{{ item }}" owner=gpadmin group=gpadmin mode=0644
+      with_items:
+        - hawq-site.xml
+        - hdfs-client.xml
+        - yarn-client.xml
+        - slaves

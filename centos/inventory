@@ -1,42 +1,59 @@
 [zookeepers]
-centos1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node1     ansible_connection=ssh        ansible_ssh_user=vagrant
 
 [hadoop]
-centos1     ansible_connection=ssh        ansible_ssh_user=ubuntu
-centos2     ansible_connection=ssh        ansible_ssh_user=ubuntu
-centos3     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node1     ansible_connection=ssh        ansible_ssh_user=vagrant
+node2     ansible_connection=ssh        ansible_ssh_user=vagrant
+node3     ansible_connection=ssh        ansible_ssh_user=vagrant
+node4     ansible_connection=ssh        ansible_ssh_user=vagrant
 
-[namecentoss]
-centos1     ansible_connection=ssh        ansible_ssh_user=ubuntu
-centos2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+[namenodes]
+node1     ansible_connection=ssh        ansible_ssh_user=vagrant
+node2     ansible_connection=ssh        ansible_ssh_user=vagrant
 
-[journalcentoss]
-centos2     ansible_connection=ssh        ansible_ssh_user=ubuntu
-centos3     ansible_connection=ssh        ansible_ssh_user=ubuntu
+[journalnodes]
+node2     ansible_connection=ssh        ansible_ssh_user=vagrant
+node3     ansible_connection=ssh        ansible_ssh_user=vagrant
 
 [historyserver]
-centos2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node2     ansible_connection=ssh        ansible_ssh_user=vagrant
 
-[datacentoss]
-centos2     ansible_connection=ssh        ansible_ssh_user=ubuntu
-centos3     ansible_connection=ssh        ansible_ssh_user=ubuntu
+[datanodes]
+node2     ansible_connection=ssh        ansible_ssh_user=vagrant
+node3     ansible_connection=ssh        ansible_ssh_user=vagrant
+node4     ansible_connection=ssh        ansible_ssh_user=vagrant
 
 [resourcemanager]
-centos1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node1     ansible_connection=ssh        ansible_ssh_user=vagrant
 
 [mysql]
-centos1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node1     ansible_connection=ssh        ansible_ssh_user=vagrant
 
 [hive]
-centos1     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node1     ansible_connection=ssh        ansible_ssh_user=vagrant
+
+[hbasemaster]
+node1     ansible_connection=ssh        ansible_ssh_user=vagrant
+
+[hbaseregion]
+node2     ansible_connection=ssh        ansible_ssh_user=vagrant
+node3     ansible_connection=ssh        ansible_ssh_user=vagrant
+node4     ansible_connection=ssh        ansible_ssh_user=vagrant
 
 [spark]
-centos1     ansible_connection=ssh        ansible_ssh_user=ubuntu
-centos2     ansible_connection=ssh        ansible_ssh_user=ubuntu
-centos3     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node1     ansible_connection=ssh        ansible_ssh_user=vagrant
+node2     ansible_connection=ssh        ansible_ssh_user=vagrant
+node3     ansible_connection=ssh        ansible_ssh_user=vagrant
+node4     ansible_connection=ssh        ansible_ssh_user=vagrant
 
 [hue]
-centos2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node2     ansible_connection=ssh        ansible_ssh_user=vagrant
 
 [livy]
-centos2     ansible_connection=ssh        ansible_ssh_user=ubuntu
+node2     ansible_connection=ssh        ansible_ssh_user=vagrant
+
+[hawq]
+node1     ansible_connection=ssh        ansible_ssh_user=vagrant
+node2     ansible_connection=ssh        ansible_ssh_user=vagrant
+node3     ansible_connection=ssh        ansible_ssh_user=vagrant
+node4     ansible_connection=ssh        ansible_ssh_user=vagrant

@@ -1,7 +1,7 @@
 ---
 
 - hosts: hive
-  user: ubuntu
+  user: vagrant
   become: yes
   become_method : sudo
   become_user: root
@@ -14,7 +14,7 @@
         id: 1
     hive_version: 2.1.1
     hive_dir: /root/hive-{{hadoop_version}}
-    hive_tarball_dir: /home/ubuntu/share
+    hive_tarball_dir: /home/vagrant/share
     hive_conf_dir: "{{hive_dir}}/conf"
     hive_meta_database: hive_meta
     hive_meta_user: hive
@@ -83,5 +83,5 @@
     #- name: start hive metastore
     #  shell: "nohup {{hive_dir}}/bin/hive --service metastore &"
     
-    #- name: start hive server2
-    #  shell: "nohup {{hive_Dir}}/bin/hive --service hiveserver2 &"
+    - name: start hive server2
+      shell: "nohup {{hive_dir}}/bin/hive --service hiveserver2 &"

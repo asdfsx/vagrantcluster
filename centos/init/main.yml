@@ -1,12 +1,35 @@
 ---
 
 - hosts: all
-  user: ubuntu
+  user: vagrant
   become: yes
   become_method : sudo
   become_user: root
   vars:
   tasks:
+    - name: "backup repo config"
+      command: mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
+
+    - name: "add aliyun repo"
+      command: wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+
+    - name: "make cache"
+      command: yum makecache
+
+    - name: "install software"
+      command: yum install -y man passwd sudo tar which git mlocate links make bzip2 net-tools \
+                              autoconf automake libtool m4 gcc gcc-c++ gdb bison flex gperf maven indent \
+                              libuuid-devel krb5-devel libgsasl-devel expat-devel libxml2-devel \
+                              perl-ExtUtils-Embed pam-devel python-devel libcurl-devel snappy-devel \
+                              thrift-devel libyaml-devel libevent-devel bzip2-devel openssl-devel \
+                              openldap-devel protobuf-devel readline-devel net-snmp-devel apr-devel \
+                              libesmtp-devel python-pip json-c-devel \
+                              java-1.8.0-openjdk-devel lcov cmake \
+                              openssh-clients openssh-server perl-JSON perl-Env
+
+    - name: "instal software"
+      command: pip --retries=50 --timeout=300 install pycrypto
+
     - name: "Ensure /etc/hosts dont have 127.0.0.1 node1 config"
       command: sed -i '/^127.0.0.1.*node/d' /etc/hosts
 

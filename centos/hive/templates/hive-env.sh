@@ -53,6 +53,6 @@
 # Folder containing extra ibraries required for hive compilation/execution can be controlled by:
 # export HIVE_AUX_JARS_PATH=
 
-export JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64/jre"
+export JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.131-3.b12.el7_3.x86_64"
 export HADOOP_HOME={{hadoop_dir}}
 export HIVE_HOME={{hive_dir}}
